@@ -5,7 +5,7 @@
 schedules read_input_file(const string &filename) 
 {
     ifstream f;
-    f.open(filename);
+    f.open(filename.c_str());
     schedules sched;
 
     if(f.is_open())
@@ -40,8 +40,8 @@ schedules read_input_file(const string &filename)
             for(int i = 0; i < bracket_idx.size(); i += 2)
             {
                 string timeval = line.substr(bracket_idx[i] + 1, bracket_idx[i + 1] - bracket_idx[i] - 1);
-                int start_time = stoi(timeval.substr(0, timeval.find(",")));
-                int end_time = stoi(timeval.substr(timeval.find(",") + 1, timeval.size() - timeval.find(",")));
+                int start_time = atoi((timeval.substr(0, timeval.find(","))).c_str());
+                int end_time = atoi((timeval.substr(timeval.find(",") + 1, timeval.size() - timeval.find(","))).c_str());
                 sched[username].push_back(make_pair(start_time, end_time));
             }
         }

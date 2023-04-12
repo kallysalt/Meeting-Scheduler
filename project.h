@@ -10,8 +10,6 @@
 #include <arpa/inet.h> 
 #include <sys/wait.h>
 
-using namespace std;
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -20,6 +18,8 @@ using namespace std;
 #include <utility>
 #include <sstream>
 #include <set>
+
+using namespace std;
 
 typedef map<string,vector<pair< int,int> > > schedules;
 vector<pair< int,int> > schedule;
