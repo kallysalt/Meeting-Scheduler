@@ -58,12 +58,12 @@ int main(int argc, const char* argv[]){
     }
 
     // maintain a list of usernames corresponding to backend server A
-    string input(names_buf_a);
-    istringstream iss(input);
     set<string> usernames_a;
-    string username;
-    while (iss >> username) {
-        usernames_a.insert(username);
+    char *username;
+    username = strtok(names_buf_a, " ");
+    while (username != NULL) {
+        usernames_a.insert(string(username));
+        username = strtok(names_buf_a, " ");
     }
     for (set<string>::iterator it = usernames_a.begin(); it != usernames_a.end(); ++it) {
         cout << *it << endl;

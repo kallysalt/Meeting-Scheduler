@@ -111,7 +111,6 @@ int main(int argc, const char* argv[])
     
 
     // send all usernames it has to the main server via UDP over specified port
-    int len = strlen(usernames);
     if ((sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) == -1) {
         cout << (sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) << endl;
         perror("serverA talker: sendto");
