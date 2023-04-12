@@ -62,7 +62,7 @@ void schedules_to_buffer(schedules sched, char *buf)
         buf[curr + key.size()] = ' ';
         curr += key.size() + 1;
     }
-    buf[curr] = '\0'; // ?
+    buf[curr - 1] = '\0'; // ?
 }
 
 int main(int argc, const char* argv[])

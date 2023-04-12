@@ -6,106 +6,70 @@
 
 #include "project.h"
 
-int init_udp_socket(char *port, struct addrinfo *&p) 
-{
-    int sockfd;
-    struct addrinfo hints, *servinfo;
-    int rv;
-
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET; // TODO: use IPv4 or IPv6?
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
-
-    if ((rv = getaddrinfo(localhost, port, &hints, &servinfo)) != 0) {
-        fprintf(stderr, "serverM udp getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
-    }
-
-    // loop through all the results and make a socket
-    for (p = servinfo; p != NULL; p = p->ai_next) 
-    {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) 
-        {
-            perror("serverM udp: socket");
-            continue;
-        }
-        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) 
-        {
-            close(sockfd);
-            perror("serverM udp: bind");
-            continue;
-        }
-        break;
-    }
-
-    if (p == NULL) { 
-        fprintf(stderr, "serverM udp: failed to create socket\n");
-        return 2;
-    }
-
-    freeaddrinfo(servinfo); // free the linked-list
-    return sockfd;
-}
-
 int main(int argc, const char* argv[]){
 
     // print boot up msg
     cout << "Main Server is up and running." << endl;
 
-    // create udp socket and associate it with a port
-    struct addrinfo *udp_p;
-    int udp_sockfd = init_udp_socket(UDP_PORT_M, udp_p);
-    if (udp_sockfd <= 0) {
-        return udp_sockfd;
+    // get server M's udp port's address information
+    struct addrinfo hints, *servinfo, *udp_p;
+    int rv;
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = AI_PASSIVE;
+    if ((rv = getaddrinfo(localhost, UDP_PORT_M, &hints, &servinfo)) != 0) {
+        fprintf(stderr, "serverM udp getaddrinfo: %s\n", gai_strerror(rv));
+        return 1;
     }
+    // loop through all the results and make a socket for server M's udp port
+    int udp_sockfd;
+    for (udp_p = servinfo; udp_p != NULL; udp_p = udp_p->ai_next) 
+    {
+        if ((udp_sockfd = socket(udp_p->ai_family, udp_p->ai_socktype, udp_p->ai_protocol)) == -1) 
+        {
+            perror("serverM udp: socket");
+            continue;
+        }
+        if (bind(udp_sockfd, udp_p->ai_addr, udp_p->ai_addrlen) == -1) 
+        {
+            close(udp_sockfd);
+            perror("serverM udp: bind");
+            continue;
+        }
+        break;
+    }
+    // handle error cases
+    if (udp_p == NULL) 
+    { 
+        fprintf(stderr, "serverM udp: failed to create socket\n");
+        return 2;
+    }
+    // free the linked-list
+    freeaddrinfo(servinfo); 
 
-    // receive usernames sent from a and b via UDP over port
+    // receive usernames sent from server A via UDP over UDP_PORT_M 
     struct sockaddr_storage their_addr;
-    int size = MAX_LEN_USERNAME * MAX_NUM_USER + MAX_NUM_USER;
-    char buf_a[size];
     socklen_t addr_len = sizeof their_addr;
-    if ((recvfrom(udp_sockfd, buf_a, size , 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
+    char names_buf_a[USERNAMES_BUF_SIZE];
+    if ((recvfrom(udp_sockfd, names_buf_a, USERNAMES_BUF_SIZE - 1 , 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
         perror("serverM udp: recvfrom");
         exit(1);
     }
 
-    // maintain a list of usernames corresponding to backend server a
-    string input(buf_a);
+    // maintain a list of usernames corresponding to backend server A
+    string input(names_buf_a);
     istringstream iss(input);
-    set<string> a_usernames;
+    set<string> usernames_a;
     string username;
     while (iss >> username) {
-        a_usernames.insert(username);
+        usernames_a.insert(username);
     }
-    for (set<string>::iterator it = a_usernames.begin(); it != a_usernames.end(); ++it) {
+    for (set<string>::iterator it = usernames_a.begin(); it != usernames_a.end(); ++it) {
         cout << *it << endl;
     }
     // print correct on screen msg indicating the success of these operations
     cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
-
-    // receive usernames sent from b via UDP over port
-    char buf_b[size];
-    addr_len = sizeof their_addr;
-    if ((recvfrom(udp_sockfd, buf_b, size , 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
-        perror("serverM udp: recvfrom");
-        exit(1);
-    }
-
-    // maintain a list of usernames corresponding to backend server a
-    string input2(buf_b);
-    istringstream iss2(input2);
-    set<string> b_usernames;
-    while (iss2 >> username) {
-        b_usernames.insert(username);
-    }
-    for (set<string>::iterator it = b_usernames.begin(); it != b_usernames.end(); ++it) {
-        cout << *it << endl;
-    }
-    // print correct on screen msg indicating the success of these operations
-    cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
-
-    while(1){}
 
     return 0;
 }

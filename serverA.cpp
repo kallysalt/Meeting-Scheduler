@@ -62,7 +62,7 @@ void schedules_to_buffer(schedules sched, char *buf)
         buf[curr + key.size()] = ' ';
         curr += key.size() + 1;
     }
-    buf[curr] = '\0'; // ?
+    buf[curr - 1] = '\0'; // ?
 }
 
 int main(int argc, const char* argv[])
@@ -73,21 +73,20 @@ int main(int argc, const char* argv[])
     // read input file and store the information in a data structure
     schedules a = read_input_file("a.txt");
 
-    // create udp socket and associate it with a port
-    int sockfd;
+    // get receiver's (server M udp port) address information
     struct addrinfo hints, *servinfo, *p;
     int rv;
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET; 
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_flags = AI_PASSIVE; 
-    // get receiver's (server M) address information
     if ((rv = getaddrinfo(localhost, UDP_PORT_M, &hints, &servinfo)) != 0) 
     {
         fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
     // loop through all the results and make a socket
+    int sockfd;
     for (p = servinfo; p != NULL; p = p->ai_next) 
     {
         if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) 
@@ -103,18 +102,16 @@ int main(int argc, const char* argv[])
         fprintf(stderr, "serverA talker: failed to create socket\n");
         return 2;
     }
-    if (sockfd <= 2) 
-    {
-        return sockfd;
-    }
     // free the linked-list
     freeaddrinfo(servinfo); 
     
-    // prepare the char buffer that holds all usernames to be sent to the main server
+    // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
     schedules_to_buffer(a, usernames);
     
+
     // send all usernames it has to the main server via UDP over specified port
+    int len = strlen(usernames);
     if ((sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) == -1) {
         cout << (sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) << endl;
         perror("serverA talker: sendto");
