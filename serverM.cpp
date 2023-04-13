@@ -89,7 +89,7 @@ int main(int argc, const char* argv[]){
     // {
     //     cout << *it << endl;
     // }
-    
+
     // print correct on screen msg indicating the success of reeiving usernames from server A
     cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
     // char s[INET_ADDRSTRLEN];
@@ -203,6 +203,57 @@ int main(int argc, const char* argv[]){
             {
                 perror("client: send");
             }
+
+            // // receive username from client via TCP
+            // char username_buf[USERNAME_BUF_SIZE];
+            // if ((numbytes = recv(new_fd, username_buf, USERNAME_BUF_SIZE - 1, 0)) == -1) 
+            // {
+            //     perror("serverM tcp: recv");
+            //     exit(1);
+            // }
+            // username_buf[numbytes] = '\0';
+            // // cout << username_buf << endl;
+            // // store the users
+            // vector<string> users;
+            // int start = 0;
+            // int end;
+            // while ((end = input.find(' ', start)) != string::npos) 
+            // {
+            //     string user = input.substr(start, end - start);
+            //     if (user.length() > 20) 
+            //     {
+            //         // username contains only small letter alphabets with a max len of 20
+            //     }
+            //     users.push_back(user);
+            //     start = end + 1;
+            // }
+            // users.push_back(input.substr(start));
+
+            // receive names sent from client over tcp
+            char names_buf[USERNAMES_BUF_SIZE];
+            if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
+            {
+                perror("serverM tcp: recv");
+                exit(1);
+            }
+            names_buf[numbytes] = '\0';
+            cout << names_buf << endl;
+
+            // // check if the input is legal (empty is also illegal?)
+            
+            
+            // // if it is legal, check if the input name is in the name list of any backend server
+            // for (vector<string>::iterator it = users.begin(); it != users.end(); ++it) 
+            // {
+            //     // cout << *it << endl;
+            //     if (usernames_a.find(xx) != users.end()) 
+            //     {
+            //         std::cout << value_to_check << " is in the set." << std::endl;
+            //     } else {
+            //         std::cout << value_to_check << " is not in the set." << std::endl;
+            //     }
+            // }
+
             close(new_fd);
             exit(0);
         }

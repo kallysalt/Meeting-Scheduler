@@ -80,19 +80,11 @@ int main(int argc, const char* argv[]){
         flag = 0;
     }
 
-    // store the users
-    vector<string> users;
-    int start = 0;
-    int end;
-    while ((end = input.find(' ', start)) != string::npos) 
+    // send these names to the main server over tcp
+    if (send(sockfd, input.c_str(), input.length(), 0) == -1)
     {
-        users.push_back(input.substr(start, end - start));
-        start = end + 1;
-    }
-    users.push_back(input.substr(start));
-    for (vector<string>::iterator it = users.begin(); it != users.end(); ++it) 
-    {
-        cout << *it << endl;
+        perror("client: send");
+        exit(1);
     }
 
     close(sockfd);
