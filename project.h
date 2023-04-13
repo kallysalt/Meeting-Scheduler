@@ -18,6 +18,7 @@
 #include <utility>
 #include <sstream>
 #include <set>
+#include <signal.h>
 
 using namespace std;
 
@@ -34,3 +35,5 @@ vector<pair< int,int> > schedule;
 #define MAX_LEN_USERNAME 20
 #define MAX_NUM_USER 10
 #define USERNAMES_BUF_SIZE (MAX_LEN_USERNAME * MAX_NUM_USER + MAX_NUM_USER) // ?
+#define BACKLOG 10 // how many pending connections queue will hold ?
+#define CLIENT_MAXDATASIZE 1024
