@@ -68,16 +68,14 @@ int main(int argc, const char* argv[]){
     // print boot up msg
     cout << "Client is up and running." << endl;
 
-    // show a prompt: Please enter the usernames to check schedule availability:
-    cout << "Please enter the usernames to check schedule availability:" << endl;
-
     // wait for the usernames to be taken as inputs from the user 
     // user can enter up to 10 usernames, all of which are separated by a single space
     int flag = 1;
     string input;
     while (flag) 
     {
-        cout << "Enter a username (type 'quit' to exit): ";
+        // show a prompt: Please enter the usernames to check schedule availability:
+        cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
         flag = 0;
     }
@@ -86,11 +84,16 @@ int main(int argc, const char* argv[]){
     vector<string> users;
     int start = 0;
     int end;
-    while ((end = input.find(' ', start)) != string::npos) {
+    while ((end = input.find(' ', start)) != string::npos) 
+    {
         users.push_back(input.substr(start, end - start));
         start = end + 1;
     }
     users.push_back(input.substr(start));
+    for (vector<string>::iterator it = users.begin(); it != users.end(); ++it) 
+    {
+        cout << *it << endl;
+    }
 
     close(sockfd);
     return 0;
