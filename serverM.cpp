@@ -187,8 +187,7 @@ int main(int argc, const char* argv[]){
         perror("sigaction");
         exit(1);
     }
-
-    printf("serverM tcp: waiting for connections...\n");
+    // printf("serverM tcp: waiting for connections...\n");
 
     while (1) // main accept() loop
     {  
@@ -201,13 +200,15 @@ int main(int argc, const char* argv[]){
             perror("accept");
             continue;
         }
+        // printf("server: got connection");
 
-        printf("server: got connection");
-
-        if (!fork()) { // this is the child process
+        if (!fork()) // this is the child process
+        { 
             close(tcp_sockfd); // child doesn't need the listener
-            if (send(new_fd, "Hello, world!", 13, 0) == -1)
-                perror("send");
+            if (send(new_fd, "start client!", 13, 0) == -1) 
+            {
+                perror("client: send");
+            }
             close(new_fd);
             exit(0);
         }

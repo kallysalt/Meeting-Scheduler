@@ -13,12 +13,6 @@ void *get_in_addr(struct sockaddr *sa)
 
 int main(int argc, const char* argv[]){
 
-    // TODO: after servers are booted up and required usernames are transferred 
-    // from backend servers to the main server, the client will be started
-
-    // print boot up msg
-    cout << "Client is up and running." << endl;
-
     // get server M's tcp port's address information
     struct addrinfo hints, *servinfo, *p;
     int rv;
@@ -54,22 +48,25 @@ int main(int argc, const char* argv[]){
         fprintf(stderr, "client: failed to connect\n");
         return 2;
     }
-
-    printf("client: connecting to server\n");
+    // printf("client: connecting to server\n");
 
     // all done with this structure
     freeaddrinfo(servinfo); 
 
-    char buf[CLIENT_MAXDATASIZE];
+    char buf[20];
     int numbytes;
-    if ((numbytes = recv(sockfd, buf, CLIENT_MAXDATASIZE-1, 0)) == -1)
+    if ((numbytes = recv(sockfd, buf, 19, 0)) == -1)
     {
         perror("client: recv");
         exit(1);
     }
     buf[numbytes] = '\0';
+    // printf("client: received '%s'\n",buf);
 
-    printf("client: received '%s'\n",buf);
+    // after servers are booted up and required usernames are transferred 
+    // from backend servers to the main server, the client will be started
+    // print boot up msg
+    cout << "Client is up and running." << endl;
 
     // show a prompt: Please enter the usernames to check schedule availability:
     cout << "Please enter the usernames to check schedule availability:" << endl;
