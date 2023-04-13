@@ -112,6 +112,7 @@ int main(int argc, const char* argv[])
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
     schedules_to_buffer(b, usernames);
+    // cout << strlen(usernames) << endl;
 
     // send all usernames it has to the main server via UDP over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) == -1) {

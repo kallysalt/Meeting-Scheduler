@@ -85,6 +85,7 @@ int main(int argc, const char* argv[])
         fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
+
     // loop through all the results and make a socket
     int sockfd;
     for (p = servinfo; p != NULL; p = p->ai_next) 
@@ -96,19 +97,21 @@ int main(int argc, const char* argv[])
         }
         break;
     }
+
     // handle error cases
     if (p == NULL) 
     { 
         fprintf(stderr, "serverA talker: failed to create socket\n");
         return 2;
     }
+
     // free the linked-list
     freeaddrinfo(servinfo); 
     
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
     schedules_to_buffer(a, usernames);
-    
+    // cout << strlen(usernames) << endl;
 
     // send all usernames it has to the main server via UDP over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) == -1) {

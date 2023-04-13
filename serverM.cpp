@@ -56,14 +56,14 @@ int main(int argc, const char* argv[]){
         perror("serverM udp: recvfrom");
         exit(1);
     }
-
+    // cout << strlen(names_buf_a) << endl;
     // maintain a list of usernames corresponding to backend server A
     set<string> usernames_a;
     char *username;
     username = strtok(names_buf_a, " ");
     while (username != NULL) {
         usernames_a.insert(string(username));
-        username = strtok(names_buf_a, " ");
+        username = strtok(NULL, " ");
     }
     for (set<string>::iterator it = usernames_a.begin(); it != usernames_a.end(); ++it) {
         cout << *it << endl;
@@ -71,5 +71,33 @@ int main(int argc, const char* argv[]){
     // print correct on screen msg indicating the success of these operations
     cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
 
+    // receive usernames sent from server B via UDP over UDP_PORT_M 
+    char names_buf_b[USERNAMES_BUF_SIZE];
+    if ((recvfrom(udp_sockfd, names_buf_b, USERNAMES_BUF_SIZE - 1 , 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
+        perror("serverM udp: recvfrom");
+        exit(1);
+    }
+    // cout << strlen(names_buf_b) << endl;
+    // maintain a list of usernames corresponding to backend server B
+    set<string> usernames_b;
+    username = strtok(names_buf_b, " ");
+    while (username != NULL) {
+        usernames_b.insert(string(username));
+        username = strtok(NULL, " ");
+    }
+    for (set<string>::iterator it = usernames_b.begin(); it != usernames_b.end(); ++it) {
+        cout << *it << endl;
+    }
+    // print correct on screen msg indicating the success of these operations
+    cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
+    if (usernames_b.find("zeugmas") != usernames_a.end()) {
+        cout << "zeugmas is in server B" << endl;
+    }
+    else {
+        cout << "zeugmas is not in server B" << endl;
+    }
+
+
+    close(udp_sockfd);
     return 0;
 }
