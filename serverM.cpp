@@ -6,6 +6,13 @@
 
 #include "project.h"
 
+// get sockaddr (IPv4)
+void *get_in_addr(struct sockaddr *sa)
+{
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+
+}
+
 int main(int argc, const char* argv[]){
 
     // print boot up msg
@@ -69,7 +76,8 @@ int main(int argc, const char* argv[]){
         cout << *it << endl;
     }
     // print correct on screen msg indicating the success of these operations
-    cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
+    char s[INET_ADDRSTRLEN];
+    cout << "Main Server received the username list from server " << inet_ntop(their_addr.ss_family, get_in_addr((struct sockaddr *)&their_addr), s, sizeof s) << " using UDP over " << UDP_PORT_M << "." << endl;
 
     // receive usernames sent from server B via UDP over UDP_PORT_M 
     char names_buf_b[USERNAMES_BUF_SIZE];
