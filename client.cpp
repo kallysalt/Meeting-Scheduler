@@ -73,8 +73,25 @@ int main(int argc, const char* argv[]){
 
     // wait for the usernames to be taken as inputs from the user 
     // user can enter up to 10 usernames, all of which are separated by a single space
+    int flag = 1;
+    string input;
+    while (flag) 
+    {
+        cout << "Enter a username (type 'quit' to exit): ";
+        getline(cin, input);
+        flag = 0;
+    }
 
-    // store the usernames
+    // store the users
+    vector<string> users;
+    int start = 0;
+    int end;
+    while ((end = input.find(' ', start)) != string::npos) {
+        users.push_back(input.substr(start, end - start));
+        start = end + 1;
+    }
+    users.push_back(input.substr(start));
+
     close(sockfd);
     return 0;
 }
