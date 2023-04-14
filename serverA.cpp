@@ -87,39 +87,56 @@ int main(int argc, const char* argv[])
     schedules a = read_input_file("a.txt");
 
     // get receiver's (server M udp port) address information
-    struct addrinfo hints, *servinfo, *p;
-    int rv;
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET; 
-    hints.ai_socktype = SOCK_DGRAM;
-    hints.ai_flags = AI_PASSIVE; 
-    if ((rv = getaddrinfo(localhost, UDP_PORT_M, &hints, &servinfo)) != 0) 
+    struct addrinfo hints_udp_m, *servinfo_udp_m, *p_udp_m;
+    int rv_udp_m;
+    memset(&hints_udp_m, 0, sizeof hints_udp_m);
+    hints_udp_m.ai_family = AF_INET; 
+    hints_udp_m.ai_socktype = SOCK_DGRAM;
+    hints_udp_m.ai_flags = AI_PASSIVE; 
+    if ((rv_udp_m = getaddrinfo(localhost, UDP_PORT_M, &hints_udp_m, &servinfo_udp_m)) != 0) 
     {
-        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv));
+        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_m));
         return 1;
     }
 
     // loop through all the results and make a socket
     int sockfd;
-    for (p = servinfo; p != NULL; p = p->ai_next) 
+    struct addrinfo hints_udp_a, *servinfo_udp_a, *p_udp_a;
+    int rv_udp_a;
+    memset(&hints_udp_a, 0, sizeof hints_udp_a);
+    hints_udp_a.ai_family = AF_INET; 
+    hints_udp_a.ai_socktype = SOCK_DGRAM;
+    hints_udp_a.ai_flags = AI_PASSIVE; 
+    if ((rv_udp_a = getaddrinfo(localhost, UDP_PORT_A, &hints_udp_a, &servinfo_udp_a)) != 0) 
     {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) 
+        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_a));
+        return 1;
+    }
+    for (p_udp_a = servinfo_udp_a; p_udp_a != NULL; p_udp_a = p_udp_a->ai_next) 
+    {
+        if ((sockfd = socket(p_udp_a->ai_family, p_udp_a->ai_socktype, p_udp_a->ai_protocol)) == -1) 
         {
             perror("serverA talker: socket");
+            continue;
+        }
+        if (bind(sockfd, p_udp_a->ai_addr, p_udp_a->ai_addrlen) == -1) 
+        {
+            close(sockfd);
+            perror("serverM udp: bind");
             continue;
         }
         break;
     }
 
     // handle error cases
-    if (p == NULL) 
+    if (p_udp_a == NULL) 
     { 
         fprintf(stderr, "serverA talker: failed to create socket\n");
         return 2;
     }
 
     // free the linked-list
-    freeaddrinfo(servinfo); 
+    freeaddrinfo(servinfo_udp_a); 
     
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
@@ -127,8 +144,8 @@ int main(int argc, const char* argv[])
     // cout << strlen(usernames) << endl;
 
     // send all usernames it has to the main server via UDP over specified port
-    if ((sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) == -1) {
-        cout << (sendto(sockfd, usernames, strlen(usernames), 0, p->ai_addr, p->ai_addrlen)) << endl;
+    if ((sendto(sockfd, usernames, strlen(usernames), 0, p_udp_m->ai_addr, p_udp_m->ai_addrlen)) == -1) {
+        cout << (sendto(sockfd, usernames, strlen(usernames), 0, p_udp_m->ai_addr, p_udp_m->ai_addrlen)) << endl;
         perror("serverA talker: sendto");
         exit(1);
     }
