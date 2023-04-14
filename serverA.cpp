@@ -65,10 +65,23 @@ void schedules_to_buffer(schedules sched, char *buf)
     buf[curr - 1] = '\0'; // ?
 }
 
+vector<string> buf_to_vec(char *buf)
+{
+    vector<string> names;
+    char *name;
+    name = strtok(buf, " ");
+    while (name != NULL) 
+    {
+        names.push_back(string(name));
+        name = strtok(NULL, " ");
+    }
+    return names;
+}
+
 int main(int argc, const char* argv[])
 {
     // print boot up msg
-    cout << "ServerA is up and running using UDP on port " << UDP_PORT_A << "." << endl; // ?
+    cout << "Server A is up and running using UDP on port " << UDP_PORT_A << "." << endl; // ?
 
     // read input file and store the information in a data structure
     schedules a = read_input_file("a.txt");
@@ -121,7 +134,30 @@ int main(int argc, const char* argv[])
     }
 
     // print correct on screen msg indicating the success of sending usernames to the main server
-    cout << "ServerA finished sending a list of usernames to Main Server." << endl;
+    cout << "Server A finished sending a list of usernames to Main Server." << endl;
+
+    // TODO: receive users from main server via UDP over specified port
+    char buf[BUF_SIZE];
+    struct sockaddr_storage their_addr;
+    socklen_t addr_len;
+    addr_len = sizeof their_addr;
+    if ((recvfrom(sockfd, buf, BUF_SIZE - 1, 0, (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+        perror("serverA talker: recvfrom");
+        exit(1);
+    }
+    // print correct on screen msg indicating the success of receiving usernames from the main server
+    cout << "ServerA received the usernames from Main Server using UDP over port " << "?" << "." << endl;
+    // print the received usernames
+    cout << buf << endl;
+
+    // search in database to get all requested users' availability
+    vector<string> names = buf_to_vec(buf);
+
+    // find the times intersection among them
+    cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+
+    // send the result back to the main server
+    cout << "Server A finished sending the response to Main Server." << endl;
 
     close(sockfd);
     return 0;

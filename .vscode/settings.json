@@ -66,6 +66,8 @@
         "unordered_map": "cpp",
         "variant": "cpp",
         "algorithm": "cpp",
-        "set": "cpp"
+        "set": "cpp",
+        "functional": "cpp",
+        "filesystem": "cpp"
     }
 }

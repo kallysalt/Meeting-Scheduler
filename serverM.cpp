@@ -6,6 +6,9 @@
 
 #include "project.h"
 
+set<string> userset_a;
+set<string> userset_b;
+
 // get sockaddr (IPv4)
 void *get_in_addr(struct sockaddr *sa)
 {
@@ -13,12 +16,67 @@ void *get_in_addr(struct sockaddr *sa)
 
 }
 
+// signal handler
 void sigchld_handler(int s)
 {
     // waitpid() might overwrite errno, so we save and restore it:
     int saved_errno = errno;
     while(waitpid(-1, NULL, WNOHANG) > 0);
     errno = saved_errno;
+}
+
+set<string> buf_to_set(char *buf)
+{
+    set<string> names;
+    char *name;
+    name = strtok(buf, " ");
+    while (name != NULL) 
+    {
+        names.insert(string(name));
+        name = strtok(NULL, " ");
+    }
+    return names;
+}
+
+int validate_client_input(char *buf, vector<string> &names, vector<int> &servers)
+{
+    // check if buf is empty
+    if (strlen(buf) == 0) 
+    {
+        // TODO: handle invalid input 
+        // tell client which input is not valid
+        return 0;
+    }
+    
+    // check if usernames being entered are valid
+    char *name;
+    name = strtok(buf, " ");
+    while (name != NULL) 
+    {
+        if (strlen(name) > 20) // valid username must not exceed 20 characters
+        {
+            // TODO: handle invalid input 
+            // set entries in names and servers to null
+            // tell client which input is not valid
+            return 0;
+        }
+        else  // valid username must belongs to either server a or b
+        {
+            int belongs_to_a = find(userset_a.begin(), userset_a.end(), string(name)) != userset_a.end();
+            int belongs_to_b = find(userset_b.begin(), userset_b.end(), string(name)) != userset_b.end();
+            if ((!belongs_to_a) && (!belongs_to_b)) 
+            {
+                // TODO: handle invalid input 
+                // set all entries in names and servers to null
+                // tell client which client is not valid
+                return 0;
+            }
+            names.push_back(string(name));
+            servers.push_back(belongs_to_a ? 0 : 1);
+            name = strtok(NULL, " ");
+        }
+    }
+    return 1;
 }
 
 int main(int argc, const char* argv[]){
@@ -75,21 +133,10 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf_a[numbytes] = '\0';
-    // cout << strlen(names_buf_a) << endl;
+    
     // maintain a list of usernames corresponding to backend server A
-    set<string> usernames_a;
-    char *username;
-    username = strtok(names_buf_a, " ");
-    while (username != NULL) 
-    {
-        usernames_a.insert(string(username));
-        username = strtok(NULL, " ");
-    }
-    // for (set<string>::iterator it = usernames_a.begin(); it != usernames_a.end(); ++it) 
-    // {
-    //     cout << *it << endl;
-    // }
-
+    userset_a = buf_to_set(names_buf_a);
+    
     // print correct on screen msg indicating the success of reeiving usernames from server A
     cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
     // char s[INET_ADDRSTRLEN];
@@ -104,20 +151,10 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf_b[numbytes] = '\0';
-    // cout << strlen(names_buf_b) << endl;
-    // maintain a list of usernames corresponding to backend server B
-    set<string> usernames_b;
-    username = strtok(names_buf_b, " ");
-    while (username != NULL) 
-    {
-        usernames_b.insert(string(username));
-        username = strtok(NULL, " ");
-    }
-    // for (set<string>::iterator it = usernames_b.begin(); it != usernames_b.end(); ++it) 
-    // {
-    //     cout << *it << endl;
-    // }
 
+    // maintain a list of usernames corresponding to backend server B
+    userset_b = buf_to_set(names_buf_b);
+    
    // print correct on screen msg indicating the success of reeiving usernames from server B
     cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
 
@@ -137,7 +174,8 @@ int main(int argc, const char* argv[]){
     // loop through all the results and bind to the first we can
     int tcp_sockfd;  // listen on sock_fd
     int yes = 1;
-    for (tcp_p = tcp_servinfo; tcp_p != NULL; tcp_p = tcp_p->ai_next) {
+    for (tcp_p = tcp_servinfo; tcp_p != NULL; tcp_p = tcp_p->ai_next) 
+    {
         if ((tcp_sockfd = socket(tcp_p->ai_family, tcp_p->ai_socktype, tcp_p->ai_protocol)) == -1) 
         {
             perror("serverM tcp: socket");
@@ -204,32 +242,7 @@ int main(int argc, const char* argv[]){
                 perror("client: send");
             }
 
-            // // receive username from client via TCP
-            // char username_buf[USERNAME_BUF_SIZE];
-            // if ((numbytes = recv(new_fd, username_buf, USERNAME_BUF_SIZE - 1, 0)) == -1) 
-            // {
-            //     perror("serverM tcp: recv");
-            //     exit(1);
-            // }
-            // username_buf[numbytes] = '\0';
-            // // cout << username_buf << endl;
-            // // store the users
-            // vector<string> users;
-            // int start = 0;
-            // int end;
-            // while ((end = input.find(' ', start)) != string::npos) 
-            // {
-            //     string user = input.substr(start, end - start);
-            //     if (user.length() > 20) 
-            //     {
-            //         // username contains only small letter alphabets with a max len of 20
-            //     }
-            //     users.push_back(user);
-            //     start = end + 1;
-            // }
-            // users.push_back(input.substr(start));
-
-            // receive names sent from client over tcp
+            // receive names sent from client via tcp
             char names_buf[USERNAMES_BUF_SIZE];
             if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
             {
@@ -239,20 +252,26 @@ int main(int argc, const char* argv[]){
             names_buf[numbytes] = '\0';
             cout << names_buf << endl;
 
-            // // check if the input is legal (empty is also illegal?)
+            // validate the input
+            // TODO: for usernames that do not exist, reply the client with a msg saying which usernames do not exist
+            // for those do exist, split them into two sublists based on where the user information is located
+            vector<string> users;
+            vector<int> servers; // store the server each user belongs to (a=0, b=1) 
+            while (!validate_client_input(names_buf, users, servers)) 
+            {
+                // if (send(new_fd, "invalid input!", 14, 0) == -1) 
+                // {
+                //     perror("client: send");
+                // }
+            }
+
+            // forward valid usernames to the corresponding backend server via udp
+
+            // receive time slots from different backend servers via udp
+
+            // run an algo to get the final time slots that works for all participants
             
-            
-            // // if it is legal, check if the input name is in the name list of any backend server
-            // for (vector<string>::iterator it = users.begin(); it != users.end(); ++it) 
-            // {
-            //     // cout << *it << endl;
-            //     if (usernames_a.find(xx) != users.end()) 
-            //     {
-            //         std::cout << value_to_check << " is in the set." << std::endl;
-            //     } else {
-            //         std::cout << value_to_check << " is not in the set." << std::endl;
-            //     }
-            // }
+            // sends the result back to the client via tcp
 
             close(new_fd);
             exit(0);
