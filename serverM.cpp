@@ -70,8 +70,8 @@ int validate_client_input(char *buf, vector<string> &names, vector<int> &servers
         }
         else  // valid username must belongs to either server a or b
         {
-            int belongs_to_a = find(userset_a.begin(), userset_a.end(), string(name)) != userset_a.end();
-            int belongs_to_b = find(userset_b.begin(), userset_b.end(), string(name)) != userset_b.end();
+            int belongs_to_a = (userset_a.find(string(name)) != userset_a.end());
+            int belongs_to_b =  (userset_b.find(string(name)) != userset_b.end());
             if ((!belongs_to_a) && (!belongs_to_b)) 
             {
                 // TODO: handle invalid input 
