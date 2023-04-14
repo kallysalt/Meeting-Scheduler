@@ -12,8 +12,16 @@ set<string> userset_b;
 // get sockaddr (IPv4)
 void *get_in_addr(struct sockaddr *sa)
 {
-    return &(((struct sockaddr_in*)sa)->sin_addr);
+    return &(((struct sockaddr_in*) sa)->sin_addr);
 
+}
+
+// get socket port number (IPv4)
+void get_in_port(struct sockaddr_storage &their_addr, char *port) 
+{
+    sockaddr *sa = (struct sockaddr *) &their_addr;
+    uint16_t port_num = ntohs(((struct sockaddr_in *) sa)->sin_port);
+    sprintf(port, "%u", port_num);
 }
 
 // signal handler
@@ -85,110 +93,132 @@ int main(int argc, const char* argv[]){
     cout << "Main Server is up and running." << endl;
 
     // get server M's udp port's address information
-    struct addrinfo udp_hints, *udp_servinfo, *udp_p;
-    int udp_rv;
-    memset(&udp_hints, 0, sizeof udp_hints);
-    udp_hints.ai_family = AF_INET;
-    udp_hints.ai_socktype = SOCK_DGRAM;
-    udp_hints.ai_flags = AI_PASSIVE;
-    if ((udp_rv = getaddrinfo(localhost, UDP_PORT_M, &udp_hints, &udp_servinfo)) != 0) {
-        fprintf(stderr, "serverM udp getaddrinfo: %s\n", gai_strerror(udp_rv));
+    struct addrinfo hints_udp_m, *servinfo_udp_m , *p_udp_m;
+    int rv_udp_m;
+    memset(&hints_udp_m, 0, sizeof hints_udp_m);
+    hints_udp_m.ai_family = AF_INET;
+    hints_udp_m.ai_socktype = SOCK_DGRAM;
+    hints_udp_m.ai_flags = AI_PASSIVE;
+    if ((rv_udp_m = getaddrinfo(localhost, UDP_PORT_M, &hints_udp_m, &servinfo_udp_m )) != 0) 
+    {
+        fprintf(stderr, "serverM udp getaddrinfo: %s\n", gai_strerror(rv_udp_m));
         return 1;
     }
     // loop through all the results and make a socket for server M's udp port
-    int udp_sockfd;
-    for (udp_p = udp_servinfo; udp_p != NULL; udp_p = udp_p->ai_next) 
+    int sockfd_udp_m;
+    for (p_udp_m = servinfo_udp_m ; p_udp_m != NULL; p_udp_m = p_udp_m->ai_next) 
     {
-        if ((udp_sockfd = socket(udp_p->ai_family, udp_p->ai_socktype, udp_p->ai_protocol)) == -1) 
+        if ((sockfd_udp_m = socket(p_udp_m->ai_family, p_udp_m->ai_socktype, p_udp_m->ai_protocol)) == -1) 
         {
             perror("serverM udp: socket");
             continue;
         }
-        if (bind(udp_sockfd, udp_p->ai_addr, udp_p->ai_addrlen) == -1) 
+        if (bind(sockfd_udp_m, p_udp_m->ai_addr, p_udp_m->ai_addrlen) == -1) 
         {
-            close(udp_sockfd);
+            close(sockfd_udp_m);
             perror("serverM udp: bind");
             continue;
         }
         break;
     }
     // handle error cases
-    if (udp_p == NULL) 
+    if (p_udp_m == NULL) 
     { 
         fprintf(stderr, "serverM udp: failed to create socket\n");
         return 2;
     }
     // free the linked-list
-    freeaddrinfo(udp_servinfo); 
+    freeaddrinfo(servinfo_udp_m); 
 
-    // receive usernames sent from server A via UDP over UDP_PORT_M 
-    struct sockaddr_storage udp_their_addr;
-    socklen_t udp_addr_len = sizeof udp_their_addr;
-    char names_buf_a[USERNAMES_BUF_SIZE];
+    // receive usernames sent from server A/B via UDP over UDP_PORT_M 
+    struct sockaddr_storage their_addr_udp;
+    socklen_t udp_addr_len = sizeof their_addr_udp;
+    char names_buf[USERNAMES_BUF_SIZE];
     int numbytes;
-    if ((numbytes = recvfrom(udp_sockfd, names_buf_a, USERNAMES_BUF_SIZE - 1 , 0, 
-        (struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) 
+    
+    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
+        (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
     {
         perror("serverM udp: recvfrom");
         exit(1);
     }
-    names_buf_a[numbytes] = '\0';
-    
-    // maintain a list of usernames corresponding to backend server A
-    userset_a = buf_to_set(names_buf_a);
-    
-    // print correct on screen msg indicating the success of reeiving usernames from server A
-    cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
-    // char s[INET_ADDRSTRLEN];
-    // cout << "Main Server received the username list from server " << inet_ntop(udp_their_addr.ss_family, get_in_addr((struct sockaddr *)&udp_their_addr), s, sizeof s) << " using UDP over " << UDP_PORT_M << "." << endl;
+    names_buf[numbytes] = '\0';
 
-    // receive usernames sent from server B via UDP over UDP_PORT_M 
-    char names_buf_b[USERNAMES_BUF_SIZE];
-    if ((numbytes = recvfrom(udp_sockfd, names_buf_b, USERNAMES_BUF_SIZE - 1 , 0, 
-        (struct sockaddr *)&udp_their_addr, &udp_addr_len)) == -1) 
+    char src_port[10]; // ?
+    get_in_port(their_addr_udp, src_port);
+    if (strcmp(src_port, UDP_PORT_A) == 0) 
+    {
+        // maintain a list of usernames corresponding to backend server A
+        userset_a = buf_to_set(names_buf);
+        // print correct on screen msg indicating the success of reeiving usernames from server A
+        cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
+    }
+    else if (strcmp(src_port, UDP_PORT_B) == 0) 
+    {
+        // maintain a list of usernames corresponding to backend server B
+        userset_b = buf_to_set(names_buf);
+        // print correct on screen msg indicating the success of reeiving usernames from server B
+        cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
+    }
+    
+    // receive usernames sent from server A/B via UDP over UDP_PORT_M 
+    memset(names_buf, 0, sizeof(names_buf));
+    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
+        (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
     {
         perror("serverM udp: recvfrom");
         exit(1);
     }
-    names_buf_b[numbytes] = '\0';
+    names_buf[numbytes] = '\0';
 
-    // maintain a list of usernames corresponding to backend server B
-    userset_b = buf_to_set(names_buf_b);
-    
-   // print correct on screen msg indicating the success of reeiving usernames from server B
-    cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
+    memset(src_port, 0, sizeof(src_port));
+    get_in_port(their_addr_udp, src_port);
+    if (strcmp(src_port, UDP_PORT_A) == 0) 
+    {
+        // maintain a list of usernames corresponding to backend server A
+        userset_a = buf_to_set(names_buf);
+        // print correct on screen msg indicating the success of reeiving usernames from server A
+        cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
+    }
+    else if (strcmp(src_port, UDP_PORT_B) == 0) 
+    {
+        // maintain a list of usernames corresponding to backend server B
+        userset_b = buf_to_set(names_buf);
+        // print correct on screen msg indicating the success of reeiving usernames from server B
+        cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
+    }
 
     // get server M's tcp port's address information
-    struct addrinfo tcp_hints, *tcp_servinfo, *tcp_p;
-    int tcp_rv;
-    memset(&tcp_hints, 0, sizeof tcp_hints);
-    tcp_hints.ai_family = AF_UNSPEC;
-    tcp_hints.ai_socktype = SOCK_STREAM;
-    tcp_hints.ai_flags = AI_PASSIVE;
-    if ((tcp_rv = getaddrinfo(localhost, TCP_PORT_M, &tcp_hints, &tcp_servinfo)) != 0) 
+    struct addrinfo hints_tcp_m, *servinfo_tcp_m, *p_tcp_m;
+    int rv_tcp_m;
+    memset(&hints_tcp_m, 0, sizeof hints_tcp_m);
+    hints_tcp_m.ai_family = AF_UNSPEC;
+    hints_tcp_m.ai_socktype = SOCK_STREAM;
+    hints_tcp_m.ai_flags = AI_PASSIVE;
+    if ((rv_tcp_m = getaddrinfo(localhost, TCP_PORT_M, &hints_tcp_m, &servinfo_tcp_m)) != 0) 
     {
-        fprintf(stderr, "serverM tcp getaddrinfo: %s\n", gai_strerror(udp_rv));
+        fprintf(stderr, "serverM tcp getaddrinfo: %s\n", gai_strerror(rv_tcp_m));
         return 1;
     }
 
     // loop through all the results and bind to the first we can
-    int tcp_sockfd;  // listen on sock_fd
+    int sockfd_tcp_m;  // listen on sock_fd
     int yes = 1;
-    for (tcp_p = tcp_servinfo; tcp_p != NULL; tcp_p = tcp_p->ai_next) 
+    for (p_tcp_m = servinfo_tcp_m; p_tcp_m != NULL; p_tcp_m = p_tcp_m->ai_next) 
     {
-        if ((tcp_sockfd = socket(tcp_p->ai_family, tcp_p->ai_socktype, tcp_p->ai_protocol)) == -1) 
+        if ((sockfd_tcp_m = socket(p_tcp_m->ai_family, p_tcp_m->ai_socktype, p_tcp_m->ai_protocol)) == -1) 
         {
             perror("serverM tcp: socket");
             continue;
         }
-        if (setsockopt(tcp_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) 
+        if (setsockopt(sockfd_tcp_m, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) 
         {
             perror("serverM tcp: setsockopt");
             exit(1);
         }
-        if (bind(tcp_sockfd, tcp_p->ai_addr, tcp_p->ai_addrlen) == -1) 
+        if (bind(sockfd_tcp_m, p_tcp_m->ai_addr, p_tcp_m->ai_addrlen) == -1) 
         {
-            close(tcp_sockfd);
+            close(sockfd_tcp_m);
             perror("serverM tcp: bind");
             continue;
         }
@@ -196,15 +226,15 @@ int main(int argc, const char* argv[]){
     }
 
     // all done with this structure
-    freeaddrinfo(tcp_servinfo); 
+    freeaddrinfo(servinfo_tcp_m); 
 
     // handle error cases
-    if (tcp_p == NULL)  
+    if (p_tcp_m == NULL)  
     {
         fprintf(stderr, "serverM tcp: failed to bind\n");
         exit(1);
     }
-    if (listen(tcp_sockfd, BACKLOG) == -1) {
+    if (listen(sockfd_tcp_m, BACKLOG) == -1) {
         perror("listen");
         exit(1);
     }
@@ -224,9 +254,9 @@ int main(int argc, const char* argv[]){
     while (1) // main accept() loop
     {  
         int new_fd; // new connection on new_fd
-        struct sockaddr_storage tcp_their_addr; // connector's address information
-        sin_size = sizeof tcp_their_addr;
-        new_fd = accept(tcp_sockfd, (struct sockaddr *)&tcp_their_addr, &sin_size);
+        struct sockaddr_storage their_addr_tcp; // connector's address information
+        sin_size = sizeof their_addr_tcp;
+        new_fd = accept(sockfd_tcp_m, (struct sockaddr *) &their_addr_tcp, &sin_size);
         if (new_fd == -1) 
         {
             perror("accept");
@@ -236,7 +266,7 @@ int main(int argc, const char* argv[]){
 
         if (!fork()) // this is the child process
         { 
-            close(tcp_sockfd); // child doesn't need the listener
+            close(sockfd_tcp_m); // child doesn't need the listener
             if (send(new_fd, "start client!", 13, 0) == -1) 
             {
                 perror("client: send");
@@ -279,6 +309,6 @@ int main(int argc, const char* argv[]){
         close(new_fd);  // parent doesn't need this
     }
 
-    close(udp_sockfd);
+    close(sockfd_udp_m);
     return 0;
 }

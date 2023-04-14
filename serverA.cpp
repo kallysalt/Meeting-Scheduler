@@ -136,28 +136,28 @@ int main(int argc, const char* argv[])
     // print correct on screen msg indicating the success of sending usernames to the main server
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
 
-    // TODO: receive users from main server via UDP over specified port
-    char buf[BUF_SIZE];
-    struct sockaddr_storage their_addr;
-    socklen_t addr_len;
-    addr_len = sizeof their_addr;
-    if ((recvfrom(sockfd, buf, BUF_SIZE - 1, 0, (struct sockaddr *)&their_addr, &addr_len)) == -1) {
-        perror("serverA talker: recvfrom");
-        exit(1);
-    }
-    // print correct on screen msg indicating the success of receiving usernames from the main server
-    cout << "ServerA received the usernames from Main Server using UDP over port " << "?" << "." << endl;
-    // print the received usernames
-    cout << buf << endl;
+    // // TODO: receive users from main server via UDP over specified port
+    // char buf[BUF_SIZE];
+    // struct sockaddr_storage their_addr;
+    // socklen_t addr_len;
+    // addr_len = sizeof their_addr;
+    // if ((recvfrom(sockfd, buf, BUF_SIZE - 1, 0, (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+    //     perror("serverA talker: recvfrom");
+    //     exit(1);
+    // }
+    // // print correct on screen msg indicating the success of receiving usernames from the main server
+    // cout << "ServerA received the usernames from Main Server using UDP over port " << "?" << "." << endl;
+    // // print the received usernames
+    // cout << buf << endl;
 
-    // search in database to get all requested users' availability
-    vector<string> names = buf_to_vec(buf);
+    // // search in database to get all requested users' availability
+    // vector<string> names = buf_to_vec(buf);
 
-    // find the times intersection among them
-    cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+    // // find the times intersection among them
+    // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
 
-    // send the result back to the main server
-    cout << "Server A finished sending the response to Main Server." << endl;
+    // // send the result back to the main server
+    // cout << "Server A finished sending the response to Main Server." << endl;
 
     close(sockfd);
     return 0;
