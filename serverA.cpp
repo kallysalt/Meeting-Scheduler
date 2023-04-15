@@ -50,7 +50,7 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
-void schedules_to_buffer(schedules sched, char *buf)
+void schedules_to_buf(schedules sched, char *buf)
 {
     int curr = 0;
     for (schedules::const_iterator it = sched.begin(); it != sched.end(); it++)
@@ -84,24 +84,10 @@ int main(int argc, const char* argv[])
     cout << "Server A is up and running using UDP on port " << UDP_PORT_A << "." << endl; // ?
 
     // read input file and store the information in a data structure
-    schedules a = read_input_file("a.txt");
+    schedules scheds = read_input_file("a.txt");
 
-    // get receiver's (server M udp port) address information
-    struct addrinfo hints_udp_m, *servinfo_udp_m, *p_udp_m;
-    int rv_udp_m;
-    memset(&hints_udp_m, 0, sizeof hints_udp_m);
-    hints_udp_m.ai_family = AF_INET; 
-    hints_udp_m.ai_socktype = SOCK_DGRAM;
-    hints_udp_m.ai_flags = AI_PASSIVE; 
-    if ((rv_udp_m = getaddrinfo(localhost, UDP_PORT_M, &hints_udp_m, &servinfo_udp_m)) != 0) 
-    {
-        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_m));
-        return 1;
-    }
-
-    // loop through all the results and make a socket
-    int sockfd;
-    struct addrinfo hints_udp_a, *servinfo_udp_a, *p_udp_a;
+    // get itself's (server A udp port) address information
+    struct addrinfo hints_udp_a, *servinfo_udp_a;
     int rv_udp_a;
     memset(&hints_udp_a, 0, sizeof hints_udp_a);
     hints_udp_a.ai_family = AF_INET; 
@@ -112,6 +98,11 @@ int main(int argc, const char* argv[])
         fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_a));
         return 1;
     }
+
+    // loop through all the results and make a socket
+    int sockfd;
+    struct addrinfo *p_udp_a;
+    
     for (p_udp_a = servinfo_udp_a; p_udp_a != NULL; p_udp_a = p_udp_a->ai_next) 
     {
         if ((sockfd = socket(p_udp_a->ai_family, p_udp_a->ai_socktype, p_udp_a->ai_protocol)) == -1) 
@@ -140,18 +131,33 @@ int main(int argc, const char* argv[])
     
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
-    schedules_to_buffer(a, usernames);
+    schedules_to_buf(scheds, usernames);
     // cout << strlen(usernames) << endl;
 
-    // send all usernames it has to the main server via UDP over specified port
-    if ((sendto(sockfd, usernames, strlen(usernames), 0, p_udp_m->ai_addr, p_udp_m->ai_addrlen)) == -1) {
-        cout << (sendto(sockfd, usernames, strlen(usernames), 0, p_udp_m->ai_addr, p_udp_m->ai_addrlen)) << endl;
+    // get receiver's (server M udp port) address information
+    struct addrinfo hints_udp_m, *servinfo_udp_m;
+    int rv_udp_m;
+    memset(&hints_udp_m, 0, sizeof hints_udp_m);
+    hints_udp_m.ai_family = AF_INET; 
+    hints_udp_m.ai_socktype = SOCK_DGRAM;
+    hints_udp_m.ai_flags = AI_PASSIVE; 
+    if ((rv_udp_m = getaddrinfo(localhost, UDP_PORT_M, &hints_udp_m, &servinfo_udp_m)) != 0) 
+    {
+        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_m));
+        return 1;
+    }
+
+    // send all usernames it has to server M via UDP over specified port
+    if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+    {
         perror("serverA talker: sendto");
         exit(1);
     }
 
-    // print correct on screen msg indicating the success of sending usernames to the main server
+    // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
+
+    //TODO: free the linked list
 
     // // TODO: receive users from main server via UDP over specified port
     // char buf[BUF_SIZE];
@@ -175,6 +181,9 @@ int main(int argc, const char* argv[])
 
     // // send the result back to the main server
     // cout << "Server A finished sending the response to Main Server." << endl;
+
+    // free the linked-list
+    freeaddrinfo(servinfo_udp_m); 
 
     close(sockfd);
     return 0;

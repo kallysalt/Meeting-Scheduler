@@ -143,6 +143,7 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf[numbytes] = '\0';
+    cout << names_buf << endl;
 
     char src_port[10]; // ?
     get_in_port(their_addr_udp, src_port);
@@ -170,6 +171,7 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf[numbytes] = '\0';
+    cout << names_buf << endl;
 
     memset(src_port, 0, sizeof(src_port));
     get_in_port(their_addr_udp, src_port);
