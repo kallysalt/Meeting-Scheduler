@@ -87,6 +87,16 @@ int validate_client_input(char *buf, vector<string> &names, vector<int> &servers
     return 1;
 }
 
+void vec_to_buf(vector<string> &vec, char *buf)
+{
+    int i = 0;
+    for (i = 0; i < vec.size(); i++) 
+    {
+        strcat(buf, vec[i].c_str());
+        strcat(buf, " ");
+    }
+}
+
 int main(int argc, const char* argv[]){
 
     // print boot up msg
@@ -130,6 +140,10 @@ int main(int argc, const char* argv[]){
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
 
+    // initialize server A and server B's udp port's address information
+    struct sockaddr_storage addr_udp_a;
+    struct sockaddr_storage addr_udp_b;
+
     // receive usernames sent from server A/B via UDP over UDP_PORT_M 
     struct sockaddr_storage their_addr_udp;
     socklen_t udp_addr_len = sizeof their_addr_udp;
@@ -145,12 +159,14 @@ int main(int argc, const char* argv[]){
     names_buf[numbytes] = '\0';
     cout << names_buf << endl;
 
+    // check which server sent the usernames
     char src_port[10]; // ?
     get_in_port(their_addr_udp, src_port);
     if (strcmp(src_port, UDP_PORT_A) == 0) 
     {
         // maintain a list of usernames corresponding to backend server A
         userset_a = buf_to_set(names_buf);
+        addr_udp_a = their_addr_udp;
         // print correct on screen msg indicating the success of reeiving usernames from server A
         cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
     }
@@ -158,6 +174,7 @@ int main(int argc, const char* argv[]){
     {
         // maintain a list of usernames corresponding to backend server B
         userset_b = buf_to_set(names_buf);
+        addr_udp_b = their_addr_udp;
         // print correct on screen msg indicating the success of reeiving usernames from server B
         cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
     }
@@ -173,12 +190,14 @@ int main(int argc, const char* argv[]){
     names_buf[numbytes] = '\0';
     cout << names_buf << endl;
 
+    // check which server sent the usernames
     memset(src_port, 0, sizeof(src_port));
     get_in_port(their_addr_udp, src_port);
     if (strcmp(src_port, UDP_PORT_A) == 0) 
     {
         // maintain a list of usernames corresponding to backend server A
         userset_a = buf_to_set(names_buf);
+        addr_udp_a = their_addr_udp;
         // print correct on screen msg indicating the success of reeiving usernames from server A
         cout << "Main Server received the username list from server A using UDP over " << UDP_PORT_M << "." << endl;
     }
@@ -186,6 +205,7 @@ int main(int argc, const char* argv[]){
     {
         // maintain a list of usernames corresponding to backend server B
         userset_b = buf_to_set(names_buf);
+        addr_udp_b = their_addr_udp;
         // print correct on screen msg indicating the success of reeiving usernames from server B
         cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
     }
@@ -236,11 +256,14 @@ int main(int argc, const char* argv[]){
         fprintf(stderr, "serverM tcp: failed to bind\n");
         exit(1);
     }
-    if (listen(sockfd_tcp_m, BACKLOG) == -1) {
+
+    // listen() for incoming connection from the client
+    if (listen(sockfd_tcp_m, BACKLOG) == -1) 
+    {
         perror("listen");
         exit(1);
     }
-
+    
     socklen_t sin_size;
     struct sigaction sa;
     sa.sa_handler = sigchld_handler; // reap all dead processes
@@ -253,7 +276,8 @@ int main(int argc, const char* argv[]){
     }
     // printf("serverM tcp: waiting for connections...\n");
 
-    while (1) // main accept() loop
+    // main accept() loop
+    while (1) 
     {  
         int new_fd; // new connection on new_fd
         struct sockaddr_storage their_addr_tcp; // connector's address information
@@ -288,17 +312,50 @@ int main(int argc, const char* argv[]){
             // TODO: for usernames that do not exist, reply the client with a msg saying which usernames do not exist
             // for those do exist, split them into two sublists based on where the user information is located
             vector<string> users;
+            users.push_back("khloe");
+            users.push_back("kinsley");
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
-            while (!validate_client_input(names_buf, users, servers)) 
+            servers.push_back(0);
+            servers.push_back(1);
+            // while (!validate_client_input(names_buf, users, servers)) 
+            // {
+            //     // if (send(new_fd, "invalid input!", 14, 0) == -1) 
+            //     // {
+            //     //     perror("client: send");
+            //     // }
+            // }
+
+            // for those do exist, split them into two sublists based on where the user information is located
+            vector<string> users_a;
+            vector<string> users_b;
+            for (int i = 0; i < users.size(); i++) 
             {
-                // if (send(new_fd, "invalid input!", 14, 0) == -1) 
-                // {
-                //     perror("client: send");
-                // }
+                if (servers[i] == 0) 
+                {
+                    users_a.push_back(users[i]);
+                }
+                else if (servers[i] == 1) 
+                {
+                    users_b.push_back(users[i]);
+                }
             }
-
+            
             // forward valid usernames to the corresponding backend server via udp
-
+            char users_a_buf[USERNAMES_BUF_SIZE];
+            vec_to_buf(users_a, users_a_buf);
+            if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
+            {
+                perror("serverM udp: sendto");
+                exit(1);
+            }
+            char users_b_buf[USERNAMES_BUF_SIZE];
+            vec_to_buf(users_b, users_b_buf);
+            if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
+            {
+                perror("serverM udp: sendto");
+                exit(1);
+            }
+            
             // receive time slots from different backend servers via udp
 
             // run an algo to get the final time slots that works for all participants
