@@ -89,11 +89,21 @@ int validate_client_input(char *buf, vector<string> &names, vector<int> &servers
 
 void vec_to_buf(vector<string> &vec, char *buf)
 {
-    int i = 0;
-    for (i = 0; i < vec.size(); i++) 
+    char* curr = buf;
+    for (size_t i = 0; i < vec.size(); i++) 
     {
-        strcat(buf, vec[i].c_str());
-        strcat(buf, " ");
+        const string &str = vec[i];
+        copy(str.begin(), str.end(), curr);
+        curr += str.size();
+        // add a space after each string, except the last one
+        if (i < vec.size() - 1) {
+            *curr = ' ';
+            curr++;
+        }
+        // add a null-terminator after the last one
+        else{
+            *curr = '\0';
+        }
     }
 }
 
