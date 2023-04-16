@@ -379,7 +379,9 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             // print correct on screen msg after sending usernames to server A
-            cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
+            if (numbytes > 0) {
+                cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
+            }
             // ASK: can i hardcode the server name here?
 
             char users_b_buf[USERNAMES_BUF_SIZE];
@@ -392,7 +394,10 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             // print correct on screen msg after sending usernames to server B
-            cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
+            if (numbytes > 0) 
+            {
+                cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
+            }
             // ASK: can i hardcode the server name here?
 
             // receive time slots from different backend servers via udp
