@@ -50,6 +50,9 @@ int main(int argc, const char* argv[]){
     }
     // printf("client: connecting to server\n");
 
+    // dyanmic port address ?
+    
+
     // all done with this structure
     freeaddrinfo(servinfo); 
 

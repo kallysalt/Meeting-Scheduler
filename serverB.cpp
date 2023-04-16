@@ -86,7 +86,7 @@ int main(int argc, const char* argv[])
     // read input file and store the information in a data structure
     schedules scheds = read_input_file("b.txt");
 
-    // get itself's (server A udp port) address information
+    // get itself's (server B udp port) address information
     struct addrinfo hints_udp_b, *servinfo_udp_b;
     int rv_udp_b;
     memset(&hints_udp_b, 0, sizeof hints_udp_b);
@@ -131,6 +131,7 @@ int main(int argc, const char* argv[])
     
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
+    memset(usernames, 0, sizeof(usernames));
     schedules_to_buf(scheds, usernames);
     // cout << strlen(usernames) << endl;
 
@@ -159,6 +160,7 @@ int main(int argc, const char* argv[])
 
     // receive users from main server via UDP over specified port
     char buf[USERNAMES_BUF_SIZE];
+    memset(buf, 0, sizeof(buf));
     struct sockaddr_storage their_addr;
     socklen_t addr_len;
     addr_len = sizeof their_addr;
@@ -170,12 +172,11 @@ int main(int argc, const char* argv[])
     buf[numbytes] = '\0';
 
     // print correct on screen msg indicating the success of receiving usernames from the main server
+    cout << "buf is: " << buf << "." << endl;
     if (numbytes != 0) {
         cout << "Server B received the usernames from Main Server using UDP over port " << UDP_PORT_B << "." << endl;
     } 
     
-    // (TESTING) print the received usernames
-    cout << buf << endl;
 
     // TODO
 

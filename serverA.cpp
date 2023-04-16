@@ -131,6 +131,7 @@ int main(int argc, const char* argv[])
     
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
+    memset(usernames, 0, sizeof(usernames));
     schedules_to_buf(scheds, usernames);
     // cout << strlen(usernames) << endl;
 
@@ -159,6 +160,7 @@ int main(int argc, const char* argv[])
 
     // receive users from main server via UDP over specified port
     char buf[USERNAMES_BUF_SIZE];
+    memset(buf, 0, sizeof(buf));
     struct sockaddr_storage their_addr;
     socklen_t addr_len;
     addr_len = sizeof their_addr;
@@ -168,13 +170,11 @@ int main(int argc, const char* argv[])
         exit(1);
     }
     buf[numbytes] = '\0';
+
     // print correct on screen msg indicating the success of receiving usernames from the main server
     if (numbytes != 0) {
         cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
     } 
-    
-    // (TESTING) print the received usernames
-    cout << buf << endl;
 
     // search in database to get all requested users' availability
     vector<string> names = buf_to_vec(buf);

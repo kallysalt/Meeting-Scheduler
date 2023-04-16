@@ -63,16 +63,16 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
     {
         if (strlen(name) > 20) // check if username is valid (no more than 20 characters)
         {
-            valid.push_back(string(name));
+            invalid.push_back(string(name));
             // TODO: reply the client with a msg saying which usernames do not exist
         }
         else // check if username belongs to either server a or b
         {
             int belongs_to_a = (userset_a.find(string(name)) != userset_a.end());
-            int belongs_to_b =  (userset_b.find(string(name)) != userset_b.end());
+            int belongs_to_b = (userset_b.find(string(name)) != userset_b.end());
             if ((!belongs_to_a) && (!belongs_to_b)) 
             {
-                valid.push_back(string(name));
+                invalid.push_back(string(name));
                 // TODO: reply the client with a msg saying which usernames do not exist
             }
             valid.push_back(string(name));
@@ -154,6 +154,7 @@ int main(int argc, const char* argv[]){
     struct sockaddr_storage their_addr_udp;
     socklen_t udp_addr_len = sizeof their_addr_udp;
     char names_buf[USERNAMES_BUF_SIZE];
+    memset(names_buf, 0, sizeof(names_buf));
     int numbytes;
     if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
         (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
@@ -166,6 +167,7 @@ int main(int argc, const char* argv[]){
 
     // check which server sent the usernames
     char src_port[10]; // ?
+    memset(src_port, 0, sizeof(src_port));
     get_in_port(their_addr_udp, src_port);
     if (strcmp(src_port, UDP_PORT_A) == 0) 
     {
@@ -306,6 +308,7 @@ int main(int argc, const char* argv[]){
 
             // receive names sent from client via tcp
             char names_buf[USERNAMES_BUF_SIZE];
+            memset(names_buf, 0, sizeof(names_buf));
             if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
             {
                 perror("serverM tcp: recv");
@@ -334,6 +337,7 @@ int main(int argc, const char* argv[]){
             if (invalid_users.size() > 0) 
             {
                 char invalid_users_buf[USERNAMES_BUF_SIZE];
+                memset(invalid_users_buf, 0, sizeof(invalid_users_buf));
                 vec_to_buf(invalid_users, invalid_users_buf);
                 if (send(new_fd, invalid_users_buf, strlen(invalid_users_buf), 0) == -1) 
                 {
@@ -365,6 +369,7 @@ int main(int argc, const char* argv[]){
             
             // forward valid usernames to the corresponding backend server via udp
             char users_a_buf[USERNAMES_BUF_SIZE];
+            memset(users_a_buf, 0, sizeof(users_a_buf));
             vec_to_buf(users_a, users_a_buf);
             // empty buf is okay for udp
             if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
@@ -373,15 +378,19 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             char users_b_buf[USERNAMES_BUF_SIZE];
+            memset(users_b_buf, 0, sizeof(users_b_buf));
             vec_to_buf(users_b, users_b_buf);
             // empty buf is okay for udp
+            cout << users_b_buf << endl;
             if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
             {
                 perror("serverM udp: sendto");
                 exit(1);
             }
+
             // receive time slots from different backend servers via udp
             char time_slots_a[TIME_SLOTS_BUF_SIZE];
+            memset(time_slots_a, 0, sizeof(time_slots_a));
             socklen_t addr_len_udp_a;
             addr_len_udp_a = sizeof addr_udp_a;
             if ((numbytes = recvfrom(sockfd_udp_m, time_slots_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
@@ -392,6 +401,7 @@ int main(int argc, const char* argv[]){
             time_slots_a[numbytes] = '\0';
 
             char time_slots_b[TIME_SLOTS_BUF_SIZE];
+            memset(time_slots_b, 0, sizeof(time_slots_b));
             socklen_t addr_len_udp_b;
             addr_len_udp_b = sizeof addr_udp_b;
             if ((numbytes = recvfrom(sockfd_udp_m, time_slots_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
