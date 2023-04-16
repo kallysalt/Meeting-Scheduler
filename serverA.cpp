@@ -157,22 +157,28 @@ int main(int argc, const char* argv[])
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
 
-    // TODO: receive users from main server via UDP over specified port
+    // receive users from main server via UDP over specified port
     char buf[USERNAMES_BUF_SIZE];
     struct sockaddr_storage their_addr;
     socklen_t addr_len;
     addr_len = sizeof their_addr;
-    if ((recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
+    int numbytes;
+    if ((numbytes = recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
         perror("serverA talker: recvfrom");
         exit(1);
     }
+    buf[numbytes] = '\0';
     // print correct on screen msg indicating the success of receiving usernames from the main server
-    cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
+    if (numbytes != 0) {
+        cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
+    } 
+    
     // (TESTING) print the received usernames
     cout << buf << endl;
 
-    // // search in database to get all requested users' availability
-    // vector<string> names = buf_to_vec(buf);
+    // search in database to get all requested users' availability
+    vector<string> names = buf_to_vec(buf);
+
 
     // // find the times intersection among them
     // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
