@@ -73,10 +73,11 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
             if ((!belongs_to_a) && (!belongs_to_b)) 
             {
                 invalid.push_back(string(name));
-                // TODO: reply the client with a msg saying which usernames do not exist
             }
-            valid.push_back(string(name));
-            servers.push_back(belongs_to_a ? 0 : 1);
+            else {
+                valid.push_back(string(name));
+                servers.push_back(belongs_to_a ? 0 : 1);
+            }
             name = strtok(NULL, " ");
         }
     }

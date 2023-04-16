@@ -117,8 +117,10 @@ int main(int argc, const char* argv[]){
     }
     buf2[numbytes] = '\0';
 
+    // ASK: no print out if all exists
     // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
     if (strcmp(buf2, "none") != 0) {
+        cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << buf2 << " do not exist." << endl;
     }
 
