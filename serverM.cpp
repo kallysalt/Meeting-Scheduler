@@ -160,7 +160,6 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf[numbytes] = '\0';
-    cout << names_buf << endl;
 
     // check which server sent the usernames
     char src_port[10]; // ?
@@ -192,7 +191,6 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf[numbytes] = '\0';
-    cout << names_buf << endl;
 
     // check which server sent the usernames
     memset(src_port, 0, sizeof(src_port));

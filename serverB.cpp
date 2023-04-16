@@ -179,10 +179,10 @@ int main(int argc, const char* argv[])
     vector<string> names = buf_to_vec(buf);
 
     // // find the times intersection among them
-    cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+    // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
 
     // // send the result back to the main server
-    cout << "Server B finished sending the response to Main Server." << endl;
+    // cout << "Server B finished sending the response to Main Server." << endl;
     
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
