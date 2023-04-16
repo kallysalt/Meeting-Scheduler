@@ -49,17 +49,15 @@ set<string> buf_to_set(char *buf)
 
 // validate client input
 void validate_client_input(char *buf, vector<string> &invalid, vector<string> &valid, vector<int> &servers)
-{
-    // TODO: check if buf is empty or full of empty spaces
-    
+{   
     char *name;
     name = strtok(buf, " ");
+
     while (name != NULL) 
     {
         if (strlen(name) > 20) // check if username is valid (no more than 20 characters)
         {
             invalid.push_back(string(name));
-            // TODO: reply the client with a msg saying which usernames do not exist
         }
         else // check if username belongs to either server a or b
         {
@@ -149,7 +147,7 @@ int main(int argc, const char* argv[]){
     struct sockaddr_storage addr_udp_a;
     struct sockaddr_storage addr_udp_b;
 
-    // receive usernames sent from server A/B via UDP over UDP_PORT_M 
+    // receive usernames sent from server A/B via udp over UDP_PORT_M 
     struct sockaddr_storage their_addr_udp;
     socklen_t udp_addr_len = sizeof their_addr_udp;
     char names_buf[USERNAMES_BUF_SIZE];
@@ -321,19 +319,16 @@ int main(int argc, const char* argv[]){
             vector<string> valid_users;
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
             validate_client_input(names_buf, invalid_users, valid_users, servers);
-            cout << "dbg: validate_client_input done" << endl;
-            cout << invalid_users.size() << endl;
-            cout << valid_users.size() << endl;
 
-            // TODO: handle the case where all usernames are invalid
+            // TODO: handle the case where all usernames are invalid, or buf is empty or full of empty spaces
             // keep requesting for valid usernames until at least one valid username is received
-            // while (users.size() == 0) 
-            // {
-            //     if (send(new_fd, "invalid input!", 14, 0) == -1) 
-            //     {
-            //         perror("client: send");
-            //     }
-            // }
+            while (valid_users.size() == 0) 
+            {
+                if (send(new_fd, "fail", 14, 0) == -1) 
+                {
+                    perror("client: send");
+                }
+            }
 
             // for usernames that do not exist, reply the client with a msg saying which usernames do not exist
             if (invalid_users.size() > 0) 
