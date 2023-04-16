@@ -33,6 +33,7 @@ void sigchld_handler(int s)
     errno = saved_errno;
 }
 
+// convert a buffer to a set of strings
 set<string> buf_to_set(char *buf)
 {
     set<string> names;
@@ -46,47 +47,42 @@ set<string> buf_to_set(char *buf)
     return names;
 }
 
-int validate_client_input(char *buf, vector<string> &names, vector<int> &servers)
+// validate client input
+void validate_client_input(char *buf, vector<string> &invalid, vector<string> &valid, vector<int> &servers)
 {
-    // check if buf is empty
+    // TODO: check if buf is empty or full of empty spaces
     if (strlen(buf) == 0) 
     {
         // TODO: handle invalid input 
         // tell client which input is not valid
-        return 0;
     }
     
-    // check if usernames being entered are valid
     char *name;
     name = strtok(buf, " ");
     while (name != NULL) 
     {
-        if (strlen(name) > 20) // valid username must not exceed 20 characters
+        if (strlen(name) > 20) // check if username is valid (no more than 20 characters)
         {
-            // TODO: handle invalid input 
-            // set entries in names and servers to null
-            // tell client which input is not valid
-            return 0;
+            valid.push_back(string(name));
+            // TODO: reply the client with a msg saying which usernames do not exist
         }
-        else  // valid username must belongs to either server a or b
+        else // check if username belongs to either server a or b
         {
             int belongs_to_a = (userset_a.find(string(name)) != userset_a.end());
             int belongs_to_b =  (userset_b.find(string(name)) != userset_b.end());
             if ((!belongs_to_a) && (!belongs_to_b)) 
             {
-                // TODO: handle invalid input 
-                // set all entries in names and servers to null
-                // tell client which client is not valid
-                return 0;
+                valid.push_back(string(name));
+                // TODO: reply the client with a msg saying which usernames do not exist
             }
-            names.push_back(string(name));
+            valid.push_back(string(name));
             servers.push_back(belongs_to_a ? 0 : 1);
             name = strtok(NULL, " ");
         }
     }
-    return 1;
 }
 
+// convert a vector of strings to a buffer
 void vec_to_buf(vector<string> &vec, char *buf)
 {
     char* curr = buf;
@@ -159,7 +155,6 @@ int main(int argc, const char* argv[]){
     socklen_t udp_addr_len = sizeof their_addr_udp;
     char names_buf[USERNAMES_BUF_SIZE];
     int numbytes;
-    
     if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
         (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
     {
@@ -274,6 +269,7 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     
+    // prepare for accepting tcp connections from the client
     socklen_t sin_size;
     struct sigaction sa;
     sa.sa_handler = sigchld_handler; // reap all dead processes
@@ -318,41 +314,59 @@ int main(int argc, const char* argv[]){
             names_buf[numbytes] = '\0';
             cout << names_buf << endl;
 
-            // validate the input
-            // TODO: for usernames that do not exist, reply the client with a msg saying which usernames do not exist
-            // for those do exist, split them into two sublists based on where the user information is located
-            vector<string> users;
-            users.push_back("khloe");
-            users.push_back("kinsley");
+            // validate client input
+            vector<string> invalid_users;
+            vector<string> valid_users;
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
-            servers.push_back(0);
-            servers.push_back(1);
-            // while (!validate_client_input(names_buf, users, servers)) 
+            validate_client_input(names_buf, invalid_users, valid_users, servers);
+
+            // TODO: handle the case where all usernames are invalid
+            // keep requesting for valid usernames until at least one valid username is received
+            // while (users.size() == 0) 
             // {
-            //     // if (send(new_fd, "invalid input!", 14, 0) == -1) 
-            //     // {
-            //     //     perror("client: send");
-            //     // }
+            //     if (send(new_fd, "invalid input!", 14, 0) == -1) 
+            //     {
+            //         perror("client: send");
+            //     }
             // }
 
-            // for those do exist, split them into two sublists based on where the user information is located
+            // for usernames that do not exist, reply the client with a msg saying which usernames do not exist
+            if (invalid_users.size() > 0) 
+            {
+                char invalid_users_buf[USERNAMES_BUF_SIZE];
+                vec_to_buf(invalid_users, invalid_users_buf);
+                if (send(new_fd, invalid_users_buf, strlen(invalid_users_buf), 0) == -1) 
+                {
+                    perror("client: send");
+                }
+            }
+            // for those do exist, reply the client with a msg saying all usernames exist
+            else {
+                if (send(new_fd, "none", 4, 0) == -1) 
+                {
+                    perror("client: send");
+                }
+            }
+
+            // split them into two sublists based on where the user information is located
             vector<string> users_a;
             vector<string> users_b;
-            for (int i = 0; i < users.size(); i++) 
+            for (int i = 0; i < valid_users.size(); i++) 
             {
                 if (servers[i] == 0) 
                 {
-                    users_a.push_back(users[i]);
+                    users_a.push_back(valid_users[i]);
                 }
                 else if (servers[i] == 1) 
                 {
-                    users_b.push_back(users[i]);
+                    users_b.push_back(valid_users[i]);
                 }
             }
             
             // forward valid usernames to the corresponding backend server via udp
             char users_a_buf[USERNAMES_BUF_SIZE];
             vec_to_buf(users_a, users_a_buf);
+            // empty buf is okay for udp
             if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
             {
                 perror("serverM udp: sendto");
@@ -360,13 +374,32 @@ int main(int argc, const char* argv[]){
             }
             char users_b_buf[USERNAMES_BUF_SIZE];
             vec_to_buf(users_b, users_b_buf);
+            // empty buf is okay for udp
             if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
             {
                 perror("serverM udp: sendto");
                 exit(1);
             }
-            
             // receive time slots from different backend servers via udp
+            char time_slots_a[TIME_SLOTS_BUF_SIZE];
+            socklen_t addr_len_udp_a;
+            addr_len_udp_a = sizeof addr_udp_a;
+            if ((numbytes = recvfrom(sockfd_udp_m, time_slots_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
+            {
+                perror("serverM udp: recvfrom");
+                exit(1);
+            }
+            time_slots_a[numbytes] = '\0';
+
+            char time_slots_b[TIME_SLOTS_BUF_SIZE];
+            socklen_t addr_len_udp_b;
+            addr_len_udp_b = sizeof addr_udp_b;
+            if ((numbytes = recvfrom(sockfd_udp_m, time_slots_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
+            {
+                perror("serverM udp: recvfrom");
+                exit(1);
+            }
+            time_slots_b[numbytes] = '\0';
 
             // run an algo to get the final time slots that works for all participants
             

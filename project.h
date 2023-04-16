@@ -36,3 +36,4 @@ typedef vector<pair< int,int> > schedule;
 #define USERNAMES_BUF_SIZE (MAX_LEN_USERNAME * MAX_NUM_USER + MAX_NUM_USER) // ?
 #define BACKLOG 10 // how many pending connections queue will hold 
 #define CLIENT_MAXDATASIZE 1024 // ？
+#define TIME_SLOTS_BUF_SIZE 100 // ?
