@@ -101,7 +101,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         name = names[i];
         sched = scheds[name];
         
-        int size = intersects.size();
+        vector<int> new_intersects;
         for (int j = 0; j < intersects.size(); j += 2) 
         {
             int x_start = intersects[j];
@@ -110,20 +110,12 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
             int y_end = sched[i].second;
             if (x_start < y_end || y_start < x_end) 
             {
-                intersects.push_back(max(x_start, y_start));
-                intersects.push_back(min(x_end, y_end));
+                new_intersects.push_back(max(x_start, y_start));
+                new_intersects.push_back(min(x_end, y_end));
             }
+            intersects.clear();
+            intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
         }
-        for (int j = 0; j < size; j++) 
-        {
-            cout << "erase!" << endl;
-            intersects.erase(intersects.begin());
-        }
-        for (int j = 0; j < intersects.size(); j++) 
-        {
-            cout << intersects[j] << " ";
-        }
-        cout << endl;
     }
     return intersects;
 }
