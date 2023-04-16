@@ -314,6 +314,9 @@ int main(int argc, const char* argv[]){
             names_buf[numbytes] = '\0';
             cout << names_buf << endl;
 
+            // print correct on screen msg indicating the success of receiving usernames from client
+            cout << "Main Server received the request from client using TCP over port " << TCP_PORT_M << "." << endl;
+
             // validate client input
             vector<string> invalid_users;
             vector<string> valid_users;
@@ -340,6 +343,9 @@ int main(int argc, const char* argv[]){
                 {
                     perror("client: send");
                 }
+                // print correct on screen msg after sending invalid usernames to client
+                cout << invalid_users_buf << " do not exist. Send a reply to the client." << endl;
+
             }
             // for those do exist, reply the client with a msg saying all usernames exist
             else {
@@ -374,16 +380,22 @@ int main(int argc, const char* argv[]){
                 perror("serverM udp: sendto");
                 exit(1);
             }
+            // print correct on screen msg after sending usernames to server A
+            cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
+            // ASK: can i hardcode the server name here?
+
             char users_b_buf[USERNAMES_BUF_SIZE];
             memset(users_b_buf, 0, sizeof(users_b_buf));
             vec_to_buf(users_b, users_b_buf);
             // empty buf is okay for udp
-            cout << users_b_buf << endl;
             if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
             {
                 perror("serverM udp: sendto");
                 exit(1);
             }
+            // print correct on screen msg after sending usernames to server B
+            cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
+            // ASK: can i hardcode the server name here?
 
             // receive time slots from different backend servers via udp
             char time_slots_a[TIME_SLOTS_BUF_SIZE];
@@ -408,9 +420,15 @@ int main(int argc, const char* argv[]){
             }
             time_slots_b[numbytes] = '\0';
 
+            // receive available time slots from different backend servers via udp
+            // cout << "Main Server received from server <A or B> the intersection result using UDP over port <port number>:" << endl;
+            // cout << "<[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
+
             // run an algo to get the final time slots that works for all participants
+            // cout << "Found the intersection between the results from server A and B: <[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
             
             // sends the result back to the client via tcp
+            // cout << "Main Server sent the result to the client." << endl;
 
             close(new_fd);
             exit(0);

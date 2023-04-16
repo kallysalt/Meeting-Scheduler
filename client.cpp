@@ -111,6 +111,9 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
 
+    // print on screen msg after sending usernames to the main server
+    cout << "Client finished sending the usernames to Main Server." << endl;
+
     // receive a msg saying which usernames do not exist from the main server over tcp
     char buf2[USERNAMES_BUF_SIZE];
     if ((numbytes = recv(sockfd, buf2, USERNAMES_BUF_SIZE - 1, 0)) == -1)
@@ -128,10 +131,14 @@ int main(int argc, const char* argv[]){
     }
 
     // receive time availability of all users in the meeting from the main server over tcp
-
-    // print: Client received the reply from Main Server using TCP over port <port number>: Time intervals <[[t1_start, t1_end], [t2_start, t2_end], ... ]> works for <username1, username2, ...>.
-
+    
+    // print on screen msg after receiving availability of all users in the meeting from the main server
+    // cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
+    // cout << "Time intervals " << "<[[t1_start, t1_end], [t2_start, t2_end], ... ]>" << " works for " << "<username1, username2, ...>" << "." << endl;
+    
     // start a new request 
+    // cout << "-----Start a new request-----" << endl;
+    // cout << "Please enter the usernames to check schedule availability:" << endl;
 
     close(sockfd);
     return 0;

@@ -133,7 +133,6 @@ int main(int argc, const char* argv[])
     char usernames[USERNAMES_BUF_SIZE];
     memset(usernames, 0, sizeof(usernames));
     schedules_to_buf(scheds, usernames);
-    // cout << strlen(usernames) << endl;
 
     // get receiver's (server M udp port) address information
     struct addrinfo hints_udp_m, *servinfo_udp_m;

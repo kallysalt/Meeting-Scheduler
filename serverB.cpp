@@ -174,9 +174,16 @@ int main(int argc, const char* argv[])
     if (numbytes != 0) {
         cout << "Server B received the usernames from Main Server using UDP over port " << UDP_PORT_B << "." << endl;
     } 
-    
-    // TODO
 
+    // search in database to get all requested users' availability
+    vector<string> names = buf_to_vec(buf);
+
+    // // find the times intersection among them
+    cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+
+    // // send the result back to the main server
+    cout << "Server B finished sending the response to Main Server." << endl;
+    
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
 
