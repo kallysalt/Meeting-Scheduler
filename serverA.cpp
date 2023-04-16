@@ -101,6 +101,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         name = names[i];
         sched = scheds[name];
         
+        int size = intersects.size();
         for (int j = 0; j < intersects.size(); j += 2) 
         {
             int x_start = intersects[j];
@@ -112,6 +113,10 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
                 intersects.push_back(max(x_start, y_start));
                 intersects.push_back(min(x_end, y_end));
             }
+        }
+        for (int j = 0; j < size; j++) 
+        {
+            intersects.erase(intersects.begin());
         }
     }
     return intersects;
