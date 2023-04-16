@@ -114,7 +114,10 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
                 new_intersects.push_back(min(x_end, y_end));
             }
             intersects.clear();
-            intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
+            // intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
+            for (int i = 0; i < new_intersects.size(); i++) {
+                intersects.push_back(new_intersects[i]);
+            }
         }
     }
     return intersects;
