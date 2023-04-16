@@ -108,6 +108,8 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
             int x_end = intersects[j + 1];
             int y_start = sched[i].first;
             int y_end = sched[i].second;
+            cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
+
             if (x_start < y_end || y_start < x_end) 
             {
                 new_intersects.push_back(max(x_start, y_start));
