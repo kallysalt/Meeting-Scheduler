@@ -2,13 +2,19 @@
 
 #include "project.h"
 
-// TODO: dynamic port assignment
-
 // get sockaddr (IPv4)
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*)sa)->sin_addr);
 
+}
+
+// get socket port number (IPv4)
+void get_in_port(struct sockaddr_storage &their_addr, char *port) 
+{
+    sockaddr *sa = (struct sockaddr *) &their_addr;
+    uint16_t port_num = ntohs(((struct sockaddr_in *) sa)->sin_port);
+    sprintf(port, "%u", port_num);
 }
 
 int main(int argc, const char* argv[]){
@@ -50,8 +56,20 @@ int main(int argc, const char* argv[]){
     }
     // printf("client: connecting to server\n");
 
-    // dyanmic port address ?
-    
+    // assign dyanmic port address to the client's tcp socket
+    struct sockaddr_storage my_addr;
+    socklen_t my_addrlen = sizeof my_addr;
+    int getsock_check = getsockname(sockfd, (struct sockaddr*) &my_addr, (socklen_t *) &my_addrlen);
+
+    // get port number
+    char tcp_port_client[10];
+    get_in_port(my_addr, tcp_port_client);
+
+    // error checking
+    if (getsock_check== -1) {
+        perror("getsockname");
+        exit(1);
+    }
 
     // all done with this structure
     freeaddrinfo(servinfo); 
