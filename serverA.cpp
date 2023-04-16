@@ -81,7 +81,7 @@ vector<string> buf_to_vec(char *buf)
 int main(int argc, const char* argv[])
 {
     // print boot up msg
-    cout << "Server A is up and running using UDP on port " << UDP_PORT_A << "." << endl; // ?
+    cout << "Server A is up and running using UDP on port " << UDP_PORT_A << "." << endl; 
 
     // read input file and store the information in a data structure
     schedules scheds = read_input_file("a.txt");
@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // loop through all the results and make a socket
+    // loop through all the results and make a udp socket
     int sockfd;
     struct addrinfo *p_udp_a;
     
@@ -148,7 +148,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // send all usernames it has to server M via UDP over specified port
+    // send all usernames it has to server M via udp over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
         perror("serverA talker: sendto");
@@ -158,7 +158,7 @@ int main(int argc, const char* argv[])
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
 
-    // receive users from main server via UDP over specified port
+    // receive users from main server via udp over specified port
     char buf[USERNAMES_BUF_SIZE];
     memset(buf, 0, sizeof(buf));
     struct sockaddr_storage their_addr;

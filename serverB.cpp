@@ -81,7 +81,7 @@ vector<string> buf_to_vec(char *buf)
 int main(int argc, const char* argv[])
 {
     // print boot up msg
-    cout << "Server B is up and running using UDP on port " << UDP_PORT_B << "." << endl; // ?
+    cout << "Server B is up and running using UDP on port " << UDP_PORT_B << "." << endl;
 
     // read input file and store the information in a data structure
     schedules scheds = read_input_file("b.txt");
@@ -99,7 +99,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // loop through all the results and make a socket
+    // loop through all the results and make a udp socket
     int sockfd;
     struct addrinfo *p_udp_b;
     
@@ -133,7 +133,6 @@ int main(int argc, const char* argv[])
     char usernames[USERNAMES_BUF_SIZE];
     memset(usernames, 0, sizeof(usernames));
     schedules_to_buf(scheds, usernames);
-    // cout << strlen(usernames) << endl;
 
     // get receiver's (server M udp port) address information
     struct addrinfo hints_udp_m, *servinfo_udp_m;
@@ -148,7 +147,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // send all usernames it has to server M via UDP over specified port
+    // send all usernames it has to server M via udp over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
         perror("serverB talker: sendto");
@@ -172,12 +171,10 @@ int main(int argc, const char* argv[])
     buf[numbytes] = '\0';
 
     // print correct on screen msg indicating the success of receiving usernames from the main server
-    cout << "buf is: " << buf << "." << endl;
     if (numbytes != 0) {
         cout << "Server B received the usernames from Main Server using UDP over port " << UDP_PORT_B << "." << endl;
     } 
     
-
     // TODO
 
     // free the linked-list

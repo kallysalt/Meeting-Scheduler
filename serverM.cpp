@@ -121,6 +121,7 @@ int main(int argc, const char* argv[]){
         fprintf(stderr, "serverM udp getaddrinfo: %s\n", gai_strerror(rv_udp_m));
         return 1;
     }
+
     // loop through all the results and make a socket for server M's udp port
     int sockfd_udp_m;
     for (p_udp_m = servinfo_udp_m ; p_udp_m != NULL; p_udp_m = p_udp_m->ai_next) 
@@ -138,12 +139,14 @@ int main(int argc, const char* argv[]){
         }
         break;
     }
+
     // handle error cases
     if (p_udp_m == NULL) 
     { 
         fprintf(stderr, "serverM udp: failed to create socket\n");
         return 2;
     }
+
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
 
@@ -187,7 +190,7 @@ int main(int argc, const char* argv[]){
         cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
     }
     
-    // receive usernames sent from server A/B via UDP over UDP_PORT_M 
+    // receive usernames sent from server A/B via udp over UDP_PORT_M 
     memset(names_buf, 0, sizeof(names_buf));
     if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
         (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
@@ -323,6 +326,9 @@ int main(int argc, const char* argv[]){
             vector<string> valid_users;
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
             validate_client_input(names_buf, invalid_users, valid_users, servers);
+            cout << "dbg: validate_client_input done" << endl;
+            cout << invalid_users.size() << endl;
+            cout << valid_users.size() << endl;
 
             // TODO: handle the case where all usernames are invalid
             // keep requesting for valid usernames until at least one valid username is received
