@@ -50,10 +50,10 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
-void schedules_to_buf(schedules sched, char *buf)
+void schedules_to_buf(schedules scheds, char *buf)
 {
     int curr = 0;
-    for (schedules::const_iterator it = sched.begin(); it != sched.end(); it++)
+    for (schedules::const_iterator it = scheds.begin(); it != scheds.end(); it++)
     {
         string key = it->first;
         for (int i = curr; i < curr + key.size(); i++) {
@@ -76,6 +76,45 @@ vector<string> buf_to_vec(char *buf)
         name = strtok(NULL, " ");
     }
     return names;
+}
+
+vector<int> find_intersection(vector<string> names, schedules &scheds) 
+{
+    vector<int> intersects;
+    string name = names[0];
+    schedule sched = scheds[name];
+    for (int k = 0; k < sched.size(); k++) 
+    {
+        intersects.push_back(sched[k].first);
+        intersects.push_back(sched[k].second);
+    }
+
+    // handle the case when there is only one user
+    if (names.size() == 1) 
+    {
+        return intersects;
+    }
+
+    // handle the case when there are more than one users
+    for (int i = 1; i < names.size(); i++) 
+    {
+        name = names[i];
+        sched = scheds[name];
+        
+        for (int j = 0; j < intersects.size(); j += 2) 
+        {
+            int x_start = intersects[j];
+            int x_end = intersects[j + 1];
+            int y_start = sched[i].first;
+            int y_end = sched[i].second;
+            if (x_start < y_end || y_start < x_end) 
+            {
+                intersects.push_back(max(x_start, y_start));
+                intersects.push_back(min(x_end, y_end));
+            }
+        }
+    }
+    return intersects;
 }
 
 int main(int argc, const char* argv[])
@@ -178,8 +217,13 @@ int main(int argc, const char* argv[])
     // search in database to get all requested users' availability
     vector<string> names = buf_to_vec(buf);
 
+    // find the time intersection among them
+    vector<int> intersects = find_intersection(names, scheds);
+    for (int i = 0; i < intersects.size(); i++) {
+        cout << intersects[i] << " ";
+    }
+    cout << endl;
 
-    // // find the times intersection among them
     // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
 
     // // send the result back to the main server
