@@ -51,11 +51,6 @@ set<string> buf_to_set(char *buf)
 void validate_client_input(char *buf, vector<string> &invalid, vector<string> &valid, vector<int> &servers)
 {
     // TODO: check if buf is empty or full of empty spaces
-    if (strlen(buf) == 0) 
-    {
-        // TODO: handle invalid input 
-        // tell client which input is not valid
-    }
     
     char *name;
     name = strtok(buf, " ");
@@ -78,8 +73,8 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
                 valid.push_back(string(name));
                 servers.push_back(belongs_to_a ? 0 : 1);
             }
-            name = strtok(NULL, " ");
         }
+        name = strtok(NULL, " ");
     }
 }
 
