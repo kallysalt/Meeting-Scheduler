@@ -320,15 +320,15 @@ int main(int argc, const char* argv[]){
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
             validate_client_input(names_buf, invalid_users, valid_users, servers);
 
-            // TODO: handle the case where all usernames are invalid, or buf is empty or full of empty spaces
-            // keep requesting for valid usernames until at least one valid username is received
-            while (valid_users.size() == 0) 
-            {
-                if (send(new_fd, "fail", 14, 0) == -1) 
-                {
-                    perror("client: send");
-                }
-            }
+            // // TODO: handle the case where all usernames are invalid, or buf is empty or full of empty spaces
+            // // keep requesting for valid usernames until at least one valid username is received
+            // while (valid_users.size() == 0) 
+            // {
+            //     if (send(new_fd, "fail", 14, 0) == -1) 
+            //     {
+            //         perror("client: send");
+            //     }
+            // }
 
             // for usernames that do not exist, reply the client with a msg saying which usernames do not exist
             if (invalid_users.size() > 0) 

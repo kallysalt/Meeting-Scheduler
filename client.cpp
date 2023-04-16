@@ -99,38 +99,33 @@ int main(int argc, const char* argv[]){
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
 
-        // send these names to the main server over tcp
-        if (send(sockfd, input.c_str(), input.length(), 0) == -1)
-        {
-            perror("client: send");
-            exit(1);
-        }
+        // TODO: if the none of the input is valid, keep requesting for client input
 
-        // receive a msg saying which usernames do not exist from the main server over tcp
-        char buf2[USERNAMES_BUF_SIZE];
-        if ((numbytes = recv(sockfd, buf2, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-        {
-            perror("client: recv");
-            exit(1);
-        }
-        buf2[numbytes] = '\0';
-
-        // ASK: no print out if all exists?
-
-        // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
-        if (strcmp(buf2, "none") != 0) {
-            cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-            cout << buf2 << " do not exist." << endl;
-        }
-
-        // if at least one input is valid, break the loop
-        // otherwise, keep requesting valid inputs from client
-        if (strcmp(buf2, "fail") != 0) {
-            flag = 0;
-        }
+        flag = 0;
     }
 
-    
+    // send these names to the main server over tcp
+    if (send(sockfd, input.c_str(), input.length(), 0) == -1)
+    {
+        perror("client: send");
+        exit(1);
+    }
+
+    // receive a msg saying which usernames do not exist from the main server over tcp
+    char buf2[USERNAMES_BUF_SIZE];
+    if ((numbytes = recv(sockfd, buf2, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+    {
+        perror("client: recv");
+        exit(1);
+    }
+    buf2[numbytes] = '\0';
+
+    // ASK: no print out if all exists
+    // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
+    if (strcmp(buf2, "none") != 0) {
+        cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
+        cout << buf2 << " do not exist." << endl;
+    }
 
     // receive time availability of all users in the meeting from the main server over tcp
 
