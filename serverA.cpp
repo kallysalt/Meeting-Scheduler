@@ -116,6 +116,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         }
         for (int j = 0; j < size; j++) 
         {
+            cout << "erase!" << endl;
             intersects.erase(intersects.begin());
         }
         for (int j = 0; j < intersects.size(); j++) 
