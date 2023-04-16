@@ -162,13 +162,13 @@ int main(int argc, const char* argv[])
     struct sockaddr_storage their_addr;
     socklen_t addr_len;
     addr_len = sizeof their_addr;
-    if ((recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *)&their_addr, &addr_len)) == -1) {
+    if ((recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
         perror("serverA talker: recvfrom");
         exit(1);
     }
     // print correct on screen msg indicating the success of receiving usernames from the main server
-    cout << "Server A received the usernames from Main Server using UDP over port " << "?" << "." << endl;
-    // print the received usernames
+    cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
+    // (TESTING) print the received usernames
     cout << buf << endl;
 
     // // search in database to get all requested users' availability

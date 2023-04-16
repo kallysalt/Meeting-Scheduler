@@ -87,6 +87,20 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
 
+    // receive a msg saying which usernames do not exist from the main server over tcp
+    char buf2[USERNAMES_BUF_SIZE];
+    if ((numbytes = recv(sockfd, buf2, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+    {
+        perror("client: recv");
+        exit(1);
+    }
+    buf2[numbytes] = '\0';
+
+    // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
+    if (strcmp(buf2, "none") != 0) {
+        cout << buf2 << " do not exist." << endl;
+    }
+
     // receive time availability of all users in the meeting from the main server over tcp
 
     // print: Client received the reply from Main Server using TCP over port <port number>: Time intervals <[[t1_start, t1_end], [t2_start, t2_end], ... ]> works for <username1, username2, ...>.
