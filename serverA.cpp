@@ -22,7 +22,7 @@ schedules read_input_file(const string &filename)
                     line.push_back(c);
                 }
             }
-            
+
             // store the information in a data structure
             // get username
             string username = line.substr(0, line.find(";"));
@@ -43,7 +43,6 @@ schedules read_input_file(const string &filename)
             }
             bracket_idx.erase(bracket_idx.begin());
             bracket_idx.erase(bracket_idx.end() - 1);
-            
             // get time intervals
             for(int i = 0; i < bracket_idx.size(); i += 2)
             {
@@ -58,7 +57,7 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
-// convert schedules to a buffer
+// convert schedules to a names buffer
 void schedules_to_buf(schedules scheds, char *buf)
 {
     int curr = 0;
@@ -68,22 +67,22 @@ void schedules_to_buf(schedules scheds, char *buf)
         for (int i = curr; i < curr + key.size(); i++) {
             buf[i] = key[i - curr];
         }
-        buf[curr + key.size()] = ' ';
+        buf[curr + key.size()] = ',';
         curr += key.size() + 1;
     }
     buf[curr - 1] = '\0'; // ?
 }
 
-// convert a buffer to a vector of strings
+// convert a names buffer to a vector of strings
 vector<string> buf_to_vec(char *buf)
 {
     vector<string> names;
     char *name;
-    name = strtok(buf, " ");
+    name = strtok(buf, ",");
     while (name != NULL) 
     {
         names.push_back(string(name));
-        name = strtok(NULL, " ");
+        name = strtok(NULL, ",");
     }
     return names;
 }
@@ -94,7 +93,10 @@ void vec_to_buf(vector<int> &vec, char *buf)
     char* curr = buf;
     for (size_t i = 0; i < vec.size(); i++) 
     {
-        const string &str = to_string(vec[i]);
+        stringstream ss;
+        ss << vec[i];
+        const string &str = ss.str();
+
         copy(str.begin(), str.end(), curr);
         curr += str.size();
         // add a space after each string, except the last one

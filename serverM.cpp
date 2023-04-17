@@ -13,7 +13,6 @@ set<string> userset_b;
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*) sa)->sin_addr);
-
 }
 
 // get socket port number (IPv4)
@@ -33,16 +32,16 @@ void sigchld_handler(int s)
     errno = saved_errno;
 }
 
-// convert a buffer to a set of strings
+// convert a names buffer to a set of strings
 set<string> buf_to_set(char *buf)
 {
     set<string> names;
     char *name;
-    name = strtok(buf, " ");
+    name = strtok(buf, ",");
     while (name != NULL) 
     {
         names.insert(string(name));
-        name = strtok(NULL, " ");
+        name = strtok(NULL, ",");
     }
     return names;
 }
@@ -76,7 +75,7 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
     }
 }
 
-// convert a vector of strings to a buffer
+// convert a vector of strings to a names buffer
 void vec_to_buf(vector<string> &vec, char *buf)
 {
     char* curr = buf;
@@ -87,7 +86,7 @@ void vec_to_buf(vector<string> &vec, char *buf)
         curr += str.size();
         // add a space after each string, except the last one
         if (i < vec.size() - 1) {
-            *curr = ' ';
+            *curr = ',';
             curr++;
         }
         // add a null-terminator after the last one
