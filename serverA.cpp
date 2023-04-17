@@ -2,6 +2,7 @@
 
 #include "project.h"
 
+// read input file and store the information in a data structure
 schedules read_input_file(const string &filename) 
 {
     ifstream f;
@@ -57,6 +58,7 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
+// convert schedules to a buffer
 void schedules_to_buf(schedules scheds, char *buf)
 {
     int curr = 0;
@@ -72,6 +74,7 @@ void schedules_to_buf(schedules scheds, char *buf)
     buf[curr - 1] = '\0'; // ?
 }
 
+// convert a buffer to a vector of strings
 vector<string> buf_to_vec(char *buf)
 {
     vector<string> names;
@@ -83,6 +86,27 @@ vector<string> buf_to_vec(char *buf)
         name = strtok(NULL, " ");
     }
     return names;
+}
+
+// convert a vector of int to a buffer
+void vec_to_buf(vector<int> &vec, char *buf)
+{
+    char* curr = buf;
+    for (size_t i = 0; i < vec.size(); i++) 
+    {
+        const string &str = to_string(vec[i]);
+        copy(str.begin(), str.end(), curr);
+        curr += str.size();
+        // add a space after each string, except the last one
+        if (i < vec.size() - 1) {
+            *curr = ' ';
+            curr++;
+        }
+        // add a null-terminator after the last one
+        else{
+            *curr = '\0';
+        }
+    }
 }
 
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
@@ -234,13 +258,17 @@ int main(int argc, const char* argv[])
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
+    char intersects_buf[INTERSECTS_BUF_SIZE];
+    vec_to_buf(intersects, intersects_buf);
+    cout << intersects_buf << endl;
+
+    // format the result for printing
+    cout << "Found the intersection result: " << endl;
     cout << "[";
     for (int i = 0; i < intersects.size(); i++) {
         cout << intersects[i] << " ";
     }
-    cout << "]" << endl;
-
-    // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+    cout << "] for " << buf << "." << endl;
 
     // // send the result back to the main server
     // cout << "Server A finished sending the response to Main Server." << endl;
