@@ -72,7 +72,6 @@ void schedules_to_buf(schedules scheds, char *buf)
         curr += key.size() + 2;
     }
     buf[curr - 2] = '\0'; // remove the last ', '
-    cout << "a schedules_to_buf test:" << buf << "ends" << endl;
 }
 
 // convert a names buffer (names are separated by ', ') to a vector of strings
@@ -185,7 +184,6 @@ int main(int argc, const char* argv[])
     // loop through all the results and make a udp socket
     int sockfd;
     struct addrinfo *p_udp_a;
-    
     for (p_udp_a = servinfo_udp_a; p_udp_a != NULL; p_udp_a = p_udp_a->ai_next) 
     {
         if ((sockfd = socket(p_udp_a->ai_family, p_udp_a->ai_socktype, p_udp_a->ai_protocol)) == -1) 
@@ -252,7 +250,6 @@ int main(int argc, const char* argv[])
         exit(1);
     }
     buf[numbytes] = '\0';
-    cout << "buf is :" << buf << endl;
 
     // print correct on screen msg indicating the success of receiving usernames from the main server
     if (numbytes != 0) {
@@ -260,6 +257,7 @@ int main(int argc, const char* argv[])
     } 
 
     // search in database to get all requested users' availability
+    // make a copy of buf before calling strtok
     char names_buf[USERNAMES_BUF_SIZE];
     strcpy(names_buf, buf);
     vector<string> names = buf_to_vec(buf);
