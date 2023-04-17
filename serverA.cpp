@@ -88,6 +88,11 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.push_back(sched[k].first);
         intersects.push_back(sched[k].second);
     }
+    // print intersects
+    for (int i = 0; i < intersects.size(); i += 2) 
+    {
+        cout << "intersects[" << i << "]=" << intersects[i] << " intersects[" << i + 1 << "]=" << intersects[i + 1] << endl;
+    }
 
     // handle the case when there is only one user
     if (names.size() == 1) 
