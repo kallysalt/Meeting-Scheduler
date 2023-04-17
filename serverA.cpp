@@ -118,11 +118,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
-    // print sched
-    for (int i = 0; i < sched.size(); i++) {
-        cout << "sched for " << name << ": ";
-        cout << sched[i].first << " " << sched[i].second << endl;
-    }
+
     for (int k = 0; k < sched.size(); k++) 
     {
         intersects.push_back(sched[k].first);
@@ -266,23 +262,23 @@ int main(int argc, const char* argv[])
     char names_buf[USERNAMES_BUF_SIZE];
     strcpy(names_buf, buf);
     vector<string> names = buf_to_vec(buf);
-    cout << "vector<string> names :";
-    for (int i = 0; i < names.size(); i++) {
-        cout << names[i] << " ";
-    }
-    cout << endl;
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
     char intersects_buf[INTERSECTS_BUF_SIZE];
     vec_to_buf(intersects, intersects_buf);
-    cout << "intersects_buf = " << intersects_buf << endl;
 
     // format the result for printing
-    cout << "Found the intersection result: " << endl;
+    cout << "Found the intersection result: ";
     cout << "[";
-    for (int i = 0; i < intersects.size(); i++) {
-        cout << intersects[i] << " ";
+    if (intersects.size() != 0) {
+        for (int i = 0; i < intersects.size(); i += 2) {
+            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+            // print "," if not the last element
+            if (i != intersects.size() - 2) {
+                cout << ",";
+            }
+        }
     }
     cout << "] for " << names_buf << "." << endl;
 
