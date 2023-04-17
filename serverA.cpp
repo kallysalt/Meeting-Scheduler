@@ -57,7 +57,7 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
-// convert schedules to a names buffer
+// convert schedules to a names buffer (names are separated by ', ')
 void schedules_to_buf(schedules scheds, char *buf)
 {
     int curr = 0;
@@ -68,26 +68,28 @@ void schedules_to_buf(schedules scheds, char *buf)
             buf[i] = key[i - curr];
         }
         buf[curr + key.size()] = ',';
-        curr += key.size() + 1;
+        buf[curr + key.size() + 1] = ' ';
+        curr += key.size() + 2;
     }
-    buf[curr - 1] = '\0'; // ?
+    buf[curr - 1] = '\0'; // ???
+    cout << "a schedules_to_buf test:" << buf << "ends" << endl;
 }
 
-// convert a names buffer to a vector of strings
+// convert a names buffer (names are separated by ', ') to a vector of strings
 vector<string> buf_to_vec(char *buf)
 {
     vector<string> names;
     char *name;
-    name = strtok(buf, ",");
+    name = strtok(buf, ", ");
     while (name != NULL) 
     {
         names.push_back(string(name));
-        name = strtok(NULL, ",");
+        name = strtok(NULL, ", ");
     }
     return names;
 }
 
-// convert a vector of int to a buffer
+// convert a vector of integers to a buffer (integers are separated by ' ')
 void vec_to_buf(vector<int> &vec, char *buf)
 {
     char* curr = buf;
@@ -111,6 +113,7 @@ void vec_to_buf(vector<int> &vec, char *buf)
     }
 }
 
+// identify the time slots that are available for all the requested users
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
 {
     vector<int> intersects;
@@ -208,11 +211,6 @@ int main(int argc, const char* argv[])
 
     // free the linked-list
     freeaddrinfo(servinfo_udp_a); 
-    
-    // store all usernames in a char buffer 
-    char usernames[USERNAMES_BUF_SIZE];
-    memset(usernames, 0, sizeof(usernames));
-    schedules_to_buf(scheds, usernames);
 
     // get receiver's (server M udp port) address information
     struct addrinfo hints_udp_m, *servinfo_udp_m;
@@ -226,6 +224,11 @@ int main(int argc, const char* argv[])
         fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_m));
         return 1;
     }
+
+    // store all usernames in a char buffer 
+    char usernames[USERNAMES_BUF_SIZE];
+    memset(usernames, 0, sizeof(usernames));
+    schedules_to_buf(scheds, usernames);
 
     // send all usernames it has to server M via udp over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
@@ -249,6 +252,7 @@ int main(int argc, const char* argv[])
         exit(1);
     }
     buf[numbytes] = '\0';
+    cout << "buf is :" << buf << endl;
 
     // print correct on screen msg indicating the success of receiving usernames from the main server
     if (numbytes != 0) {

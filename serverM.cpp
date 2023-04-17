@@ -32,21 +32,21 @@ void sigchld_handler(int s)
     errno = saved_errno;
 }
 
-// convert a names buffer to a set of strings
+// convert a names buffer (names are separated by ', ') to a set of strings
 set<string> buf_to_set(char *buf)
 {
     set<string> names;
     char *name;
-    name = strtok(buf, ",");
+    name = strtok(buf, ", ");
     while (name != NULL) 
     {
         names.insert(string(name));
-        name = strtok(NULL, ",");
+        name = strtok(NULL, ", ");
     }
     return names;
 }
 
-// validate client input
+// validate client input (names are separated by ' ')
 void validate_client_input(char *buf, vector<string> &invalid, vector<string> &valid, vector<int> &servers)
 {   
     char *name;
@@ -75,7 +75,7 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
     }
 }
 
-// convert a vector of strings to a names buffer
+// convert a vector of strings to a names buffer (names are separated by ', ')
 void vec_to_buf(vector<string> &vec, char *buf)
 {
     char* curr = buf;
@@ -88,12 +88,15 @@ void vec_to_buf(vector<string> &vec, char *buf)
         if (i < vec.size() - 1) {
             *curr = ',';
             curr++;
+            *curr = ' ';
+            curr++;
         }
         // add a null-terminator after the last one
         else{
             *curr = '\0';
         }
     }
+    cout << "m vec_to_buf test:" << buf << "ends" << endl;
 }
 
 int main(int argc, const char* argv[]){
