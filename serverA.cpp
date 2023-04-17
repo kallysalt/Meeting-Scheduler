@@ -35,12 +35,12 @@ schedules read_input_file(const string &filename)
                     bracket_idx.push_back(i);
                 }
             }
-            // handle extreme case
-            if ((bracket_idx[0]+1) == bracket_idx[1]) {
-                pair<int, int> place_holder;
-                sched[username].push_back(place_holder);
-                continue;
-            }
+            // // handle extreme case
+            // if ((bracket_idx[0]+1) == bracket_idx[1]) {
+            //     pair<int, int> place_holder;
+            //     sched[username].push_back(place_holder);
+            //     continue;
+            // }
             bracket_idx.erase(bracket_idx.begin());
             bracket_idx.erase(bracket_idx.end() - 1);
             // get time intervals
