@@ -23,6 +23,8 @@ schedules read_input_file(const string &filename)
             }
             
             // store the information in a data structure
+            // get username
+            string username = line.substr(0, line.find(";"));
             // get indexes of '[' and ']'
             vector<int> bracket_idx;
             for(int i = 0; i < line.size(); i++)
@@ -32,11 +34,16 @@ schedules read_input_file(const string &filename)
                     bracket_idx.push_back(i);
                 }
             }
+            // handle extreme case
+            if ((bracket_idx[0]+1) == bracket_idx[1]) {
+                pair<int, int> place_holder;
+                sched[username].push_back(place_holder);
+                continue;
+            }
             bracket_idx.erase(bracket_idx.begin());
             bracket_idx.erase(bracket_idx.end() - 1);
             
             // get time intervals
-            string username = line.substr(0, line.find(";"));
             for(int i = 0; i < bracket_idx.size(); i += 2)
             {
                 string timeval = line.substr(bracket_idx[i] + 1, bracket_idx[i + 1] - bracket_idx[i] - 1);
