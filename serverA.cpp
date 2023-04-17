@@ -105,23 +105,27 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
     {
         name = names[i];
         sched = scheds[name];
-        
         vector<int> new_intersects;
+
         for (int j = 0; j < intersects.size(); j += 2) 
         {
             int x_start = intersects[j];
             int x_end = intersects[j + 1];
-            int y_start = sched[i].first;
-            int y_end = sched[i].second;
-            cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
 
-            // check if there is an intersection
-            if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
-            {
+            for (int k = 0; k < sched.size(); k++) {
+                int y_start = sched[k].first;
+                int y_end = sched[k].second;
                 cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
-                new_intersects.push_back(max(x_start, y_start));
-                new_intersects.push_back(min(x_end, y_end));
+
+                // check if there is an intersection
+                if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
+                {
+                    cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
+                    new_intersects.push_back(max(x_start, y_start));
+                    new_intersects.push_back(min(x_end, y_end));
+                }
             }
+
             intersects.clear();
             intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
             for (int i = 0; i < intersects.size(); i++) {
