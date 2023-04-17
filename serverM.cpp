@@ -96,7 +96,6 @@ void vec_to_buf(vector<string> &vec, char *buf)
             *curr = '\0';
         }
     }
-    cout << "m vec_to_buf test:" << buf << "ends" << endl;
 }
 
 int main(int argc, const char* argv[]){
@@ -312,7 +311,7 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             names_buf[numbytes] = '\0';
-            cout << names_buf << endl;
+            // cout << names_buf << endl;
 
             // print correct on screen msg indicating the success of receiving usernames from client
             cout << "Main Server received the request from client using TCP over port " << TCP_PORT_M << "." << endl;
