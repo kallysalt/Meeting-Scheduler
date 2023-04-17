@@ -118,6 +118,11 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
+    // print sched
+    for (int i = 0; i < sched.size(); i++) {
+        cout << "sched for " << name << ": ";
+        cout << sched[i].first << " " << sched[i].second << endl;
+    }
     for (int k = 0; k < sched.size(); k++) 
     {
         intersects.push_back(sched[k].first);
@@ -265,6 +270,7 @@ int main(int argc, const char* argv[])
     for (int i = 0; i < names.size(); i++) {
         cout << names[i] << " ";
     }
+    cout << endl;
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
