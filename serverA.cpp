@@ -101,7 +101,6 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         name = names[i];
         sched = scheds[name];
         vector<int> new_intersects;
-        cout << "i loop +1" << endl;
 
         for (int j = 0; j < intersects.size(); j += 2) 
         {
@@ -228,10 +227,11 @@ int main(int argc, const char* argv[])
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
+    cout << "[";
     for (int i = 0; i < intersects.size(); i++) {
         cout << intersects[i] << " ";
     }
-    cout << endl;
+    cout << "]" << endl;
 
     // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
 
