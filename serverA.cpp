@@ -71,7 +71,7 @@ void schedules_to_buf(schedules scheds, char *buf)
         buf[curr + key.size() + 1] = ' ';
         curr += key.size() + 2;
     }
-    buf[curr - 1] = '\0'; // ???
+    buf[curr - 2] = '\0'; // remove the last ', '
     cout << "a schedules_to_buf test:" << buf << "ends" << endl;
 }
 
@@ -260,6 +260,8 @@ int main(int argc, const char* argv[])
     } 
 
     // search in database to get all requested users' availability
+    char names_buf[USERNAMES_BUF_SIZE];
+    strcpy(names_buf, buf);
     vector<string> names = buf_to_vec(buf);
 
     // find the time intersection among them
@@ -274,7 +276,7 @@ int main(int argc, const char* argv[])
     for (int i = 0; i < intersects.size(); i++) {
         cout << intersects[i] << " ";
     }
-    cout << "] for " << buf << "." << endl;
+    cout << "] for " << names_buf << "." << endl;
 
     // // send the result back to the main server
     // cout << "Server A finished sending the response to Main Server." << endl;
