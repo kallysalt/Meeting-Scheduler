@@ -88,11 +88,6 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.push_back(sched[k].first);
         intersects.push_back(sched[k].second);
     }
-    // print intersects
-    for (int i = 0; i < intersects.size(); i += 2) 
-    {
-        cout << "intersects[" << i << "]=" << intersects[i] << " intersects[" << i + 1 << "]=" << intersects[i + 1] << endl;
-    }
 
     // handle the case when there is only one user
     if (names.size() == 1) 
@@ -112,18 +107,14 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         {
             int x_start = intersects[j];
             int x_end = intersects[j + 1];
-            cout << "j loop +1" << endl;
 
             for (int k = 0; k < sched.size(); k++) {
                 int y_start = sched[k].first;
                 int y_end = sched[k].second;
-                // cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
-                cout << "k loop +1" << endl;
 
                 // check if there is an intersection
                 if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
                 {
-                    cout << "x_start=" << x_start << " x_end=" << x_end << " y_start=" << y_start << " y_end=" << y_end << endl;
                     new_intersects.push_back(max(x_start, y_start));
                     new_intersects.push_back(min(x_end, y_end));
                 }
@@ -131,10 +122,6 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         }
         intersects.clear();
         intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
-        // for (int i = 0; i < intersects.size(); i++) {
-        //     cout << intersects[i] << " ";
-        // }
-        // cout << endl;
     }
     return intersects;
 }
