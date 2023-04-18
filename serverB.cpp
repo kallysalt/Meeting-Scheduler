@@ -2,6 +2,7 @@
 
 #include "project.h"
 
+// read input file and store the information in a data structure
 schedules read_input_file(const string &filename) 
 {
     ifstream f;
@@ -21,8 +22,10 @@ schedules read_input_file(const string &filename)
                     line.push_back(c);
                 }
             }
-            
+
             // store the information in a data structure
+            // get username
+            string username = line.substr(0, line.find(";"));
             // get indexes of '[' and ']'
             vector<int> bracket_idx;
             for(int i = 0; i < line.size(); i++)
@@ -34,9 +37,13 @@ schedules read_input_file(const string &filename)
             }
             bracket_idx.erase(bracket_idx.begin());
             bracket_idx.erase(bracket_idx.end() - 1);
-            
+            // handle extreme case
+            if (bracket_idx.size() == 0) {
+                pair<int, int> place_holder;
+                sched[username].push_back(place_holder);
+                continue;
+            }
             // get time intervals
-            string username = line.substr(0, line.find(";"));
             for(int i = 0; i < bracket_idx.size(); i += 2)
             {
                 string timeval = line.substr(bracket_idx[i] + 1, bracket_idx[i + 1] - bracket_idx[i] - 1);
@@ -50,38 +57,114 @@ schedules read_input_file(const string &filename)
     return sched;
 }
 
-void schedules_to_buf(schedules sched, char *buf)
+// convert schedules to a names buffer (names are separated by ', ')
+void schedules_to_buf(schedules scheds, char *buf)
 {
     int curr = 0;
-    for (schedules::const_iterator it = sched.begin(); it != sched.end(); it++)
+    for (schedules::const_iterator it = scheds.begin(); it != scheds.end(); it++)
     {
         string key = it->first;
         for (int i = curr; i < curr + key.size(); i++) {
             buf[i] = key[i - curr];
         }
-        buf[curr + key.size()] = ' ';
-        curr += key.size() + 1;
+        buf[curr + key.size()] = ',';
+        buf[curr + key.size() + 1] = ' ';
+        curr += key.size() + 2;
     }
-    buf[curr - 1] = '\0'; // ?
+    buf[curr - 2] = '\0'; // remove the last ', '
 }
 
+// convert a names buffer (names are separated by ', ') to a vector of strings
 vector<string> buf_to_vec(char *buf)
 {
     vector<string> names;
     char *name;
-    name = strtok(buf, " ");
+    name = strtok(buf, ", ");
     while (name != NULL) 
     {
         names.push_back(string(name));
-        name = strtok(NULL, " ");
+        name = strtok(NULL, ", ");
     }
     return names;
+}
+
+// convert a vector of integers to a buffer (integers are separated by ' ')
+void vec_to_buf(vector<int> &vec, char *buf)
+{
+    char* curr = buf;
+    for (size_t i = 0; i < vec.size(); i++) 
+    {
+        stringstream ss;
+        ss << vec[i];
+        const string &str = ss.str();
+
+        copy(str.begin(), str.end(), curr);
+        curr += str.size();
+        // add a space after each string, except the last one
+        if (i < vec.size() - 1) {
+            *curr = ' ';
+            curr++;
+        }
+        // add a null-terminator after the last one
+        else{
+            *curr = '\0';
+        }
+    }
+}
+
+// identify the time slots that are available for all the requested users
+vector<int> find_intersection(vector<string> names, schedules &scheds) 
+{
+    vector<int> intersects;
+    string name = names[0];
+    schedule sched = scheds[name];
+
+    for (int k = 0; k < sched.size(); k++) 
+    {
+        intersects.push_back(sched[k].first);
+        intersects.push_back(sched[k].second);
+    }
+
+    // handle the case when there is only one user
+    if (names.size() == 1) 
+    {
+        return intersects;
+    }
+
+    // handle the case when there are more than one users
+    for (int i = 1; i < names.size(); i++) 
+    {
+        name = names[i];
+        sched = scheds[name];
+        vector<int> new_intersects;
+
+        for (int j = 0; j < intersects.size(); j += 2) 
+        {
+            int x_start = intersects[j];
+            int x_end = intersects[j + 1];
+
+            for (int k = 0; k < sched.size(); k++) {
+                int y_start = sched[k].first;
+                int y_end = sched[k].second;
+
+                // check if there is an intersection
+                if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
+                {
+                    new_intersects.push_back(max(x_start, y_start));
+                    new_intersects.push_back(min(x_end, y_end));
+                }
+            }
+        }
+        intersects.clear();
+        intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
+    }
+    return intersects;
 }
 
 int main(int argc, const char* argv[])
 {
     // print boot up msg
-    cout << "Server B is up and running using UDP on port " << UDP_PORT_B << "." << endl;
+    cout << "Server B is up and running using UDP on port " << UDP_PORT_B << "." << endl; 
 
     // read input file and store the information in a data structure
     schedules scheds = read_input_file("b.txt");
@@ -102,7 +185,6 @@ int main(int argc, const char* argv[])
     // loop through all the results and make a udp socket
     int sockfd;
     struct addrinfo *p_udp_b;
-    
     for (p_udp_b = servinfo_udp_b; p_udp_b != NULL; p_udp_b = p_udp_b->ai_next) 
     {
         if ((sockfd = socket(p_udp_b->ai_family, p_udp_b->ai_socktype, p_udp_b->ai_protocol)) == -1) 
@@ -113,7 +195,7 @@ int main(int argc, const char* argv[])
         if (bind(sockfd, p_udp_b->ai_addr, p_udp_b->ai_addrlen) == -1) 
         {
             close(sockfd);
-            perror("serverM udp: bind");
+            perror("serverB udp: bind");
             continue;
         }
         break;
@@ -128,11 +210,6 @@ int main(int argc, const char* argv[])
 
     // free the linked-list
     freeaddrinfo(servinfo_udp_b); 
-    
-    // store all usernames in a char buffer 
-    char usernames[USERNAMES_BUF_SIZE];
-    memset(usernames, 0, sizeof(usernames));
-    schedules_to_buf(scheds, usernames);
 
     // get receiver's (server M udp port) address information
     struct addrinfo hints_udp_m, *servinfo_udp_m;
@@ -147,6 +224,11 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    // store all usernames in a char buffer 
+    char usernames[USERNAMES_BUF_SIZE];
+    memset(usernames, 0, sizeof(usernames));
+    schedules_to_buf(scheds, usernames);
+
     // send all usernames it has to server M via udp over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
@@ -157,7 +239,7 @@ int main(int argc, const char* argv[])
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server B finished sending a list of usernames to Main Server." << endl;
 
-    // receive users from main server via UDP over specified port
+    // receive users from main server via udp over specified port
     char buf[USERNAMES_BUF_SIZE];
     memset(buf, 0, sizeof(buf));
     struct sockaddr_storage their_addr;
@@ -176,14 +258,33 @@ int main(int argc, const char* argv[])
     } 
 
     // search in database to get all requested users' availability
+    // make a copy of buf before calling strtok
+    char names_buf[USERNAMES_BUF_SIZE];
+    strcpy(names_buf, buf);
     vector<string> names = buf_to_vec(buf);
 
-    // // find the times intersection among them
-    // cout << "Found the intersection result: <[[t1_start, t1_end], [t2_start, t2_end], ... ]> for <username1, username2, ...>." << endl;
+    // find the time intersection among them
+    vector<int> intersects = find_intersection(names, scheds);
+    char intersects_buf[INTERSECTS_BUF_SIZE];
+    vec_to_buf(intersects, intersects_buf);
+
+    // format and print the result
+    cout << "Found the intersection result: ";
+    cout << "[";
+    if (intersects.size() != 0) {
+        for (int i = 0; i < intersects.size(); i += 2) {
+            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+            // print "," if not the last element
+            if (i != intersects.size() - 2) {
+                cout << ",";
+            }
+        }
+    }
+    cout << "] for " << names_buf << "." << endl;
 
     // // send the result back to the main server
     // cout << "Server B finished sending the response to Main Server." << endl;
-    
+
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
 

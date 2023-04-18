@@ -195,7 +195,7 @@ int main(int argc, const char* argv[])
         if (bind(sockfd, p_udp_a->ai_addr, p_udp_a->ai_addrlen) == -1) 
         {
             close(sockfd);
-            perror("serverM udp: bind");
+            perror("serverA udp: bind");
             continue;
         }
         break;
@@ -268,7 +268,7 @@ int main(int argc, const char* argv[])
     char intersects_buf[INTERSECTS_BUF_SIZE];
     vec_to_buf(intersects, intersects_buf);
 
-    // format the result for printing
+    // format and print the result
     cout << "Found the intersection result: ";
     cout << "[";
     if (intersects.size() != 0) {
