@@ -140,9 +140,9 @@ void int_vec_to_buf(vector<int> &vec, char *buf)
 void find_final_time_slots(vector<int> &times_a, vector<int> &times_b, char *buf)
 {
     vector<int> final_times;
-    for (size_t i = 0; i < times_a.size(); i++) 
+    for (size_t i = 0; i < times_a.size(); i+=2) 
     {
-        for (size_t j = 0; j < times_b.size(); j++) 
+        for (size_t j = 0; j < times_b.size(); j+=2) 
         {
             int x_start = times_a[i];
             int x_end = times_a[i + 1];
