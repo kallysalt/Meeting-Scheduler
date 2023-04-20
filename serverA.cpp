@@ -126,12 +126,13 @@ void int_vec_to_buf(vector<int> &vec, char *buf)
 // identify the time slots that are available for all the requested users
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
 {
-    // handle the case when there is no user
+    // when there is no user
     if (names.size() == 0) 
     {
         return vector<int>();
     }
     
+    // when there is at least one user, initialize the intersects vector
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
@@ -142,13 +143,13 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.push_back(sched[k].second);
     }
 
-    // handle the case when there is only one user
+    // when there is only one user, return immediately
     if (names.size() == 1) 
     {
         return intersects;
     }
 
-    // handle the case when there are more than one users
+    // when there are more than one users, find the intersection iteratively
     for (int i = 1; i < names.size(); i++) 
     {
         name = names[i];
@@ -175,6 +176,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.clear();
         intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
     }
+    return intersects;
 }
 
 int main(int argc, const char* argv[])
@@ -257,61 +259,65 @@ int main(int argc, const char* argv[])
 
     // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
-    // receive users from main server via udp over specified port
-    char buf[USERNAMES_BUF_SIZE];
-    memset(buf, 0, sizeof(buf));
-    struct sockaddr_storage their_addr;
-    socklen_t addr_len;
-    addr_len = sizeof their_addr;
-    int numbytes;
-    if ((numbytes = recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
-        perror("serverA talker: recvfrom");
-        exit(1);
-    }
-    buf[numbytes] = '\0';
-
-    // print correct on screen msg indicating the success of receiving usernames from the main server
-    if (numbytes != 0) {
-        cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
-    } 
-
-    // search in database to get all requested users' availability
-    // make a copy of buf before calling strtok
-    char names_buf[USERNAMES_BUF_SIZE];
-    strcpy(names_buf, buf);
-    vector<string> names = names_buf_to_vec(buf);
-
-    // find the time intersection among them
-    vector<int> intersects = find_intersection(names, scheds);
-    char intersects_buf[INTERSECTS_BUF_SIZE];
-    int_vec_to_buf(intersects, intersects_buf);
-
-    // format and print the result
-    if (names.size() != 0) 
+    while (1) 
     {
-        cout << "Found the intersection result: ";
-        cout << "[";    
-
-        for (int i = 0; i < intersects.size(); i += 2) {
-            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
-            // print "," if not the last element
-            if (i != intersects.size() - 2) 
-            {
-                cout << ",";
-            }
+        // receive users from main server via udp over specified port
+        char buf[USERNAMES_BUF_SIZE];
+        memset(buf, 0, sizeof(buf));
+        struct sockaddr_storage their_addr;
+        socklen_t addr_len;
+        addr_len = sizeof their_addr;
+        int numbytes;
+        if ((numbytes = recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
+            perror("serverA talker: recvfrom");
+            exit(1);
         }
-        cout << "] for " << names_buf << "." << endl;
-    }
+        buf[numbytes] = '\0';
 
-    // send the result back to the main server
-    if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
-    {
-        perror("serverA talker: sendto");
-        exit(1);
-    }
-    // TODO: now is temp solution, need to change
-    if (names.size() != 0) 
-    {
+        // print correct on screen msg indicating the success of receiving usernames from the main server
+        cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
+
+        // search in database to get all requested users' availability
+        // make a copy of buf before calling strtok
+        char names_buf[USERNAMES_BUF_SIZE];
+        strcpy(names_buf, buf);
+        vector<string> names = names_buf_to_vec(buf);
+
+        // find the time intersection among them
+        vector<int> intersects = find_intersection(names, scheds);
+
+        // TODO: handle the case when one of the user's sched is empty
+        if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
+            intersects.clear();
+        }
+
+        // format and print the result
+        char intersects_buf[INTERSECTS_BUF_SIZE];
+        int_vec_to_buf(intersects, intersects_buf);
+        if (names.size() != 0) 
+        {
+            cout << "Found the intersection result: ";
+            cout << "[";    
+
+            for (int i = 0; i < intersects.size(); i += 2) {
+                cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+                // print "," if not the last element
+                if (i != intersects.size() - 2) 
+                {
+                    cout << ",";
+                }
+            }
+            cout << "] for " << names_buf << "." << endl;
+        }
+
+        // send the result back to the main server
+        if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+        {
+            perror("serverA talker: sendto");
+            exit(1);
+        }
+
+        // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
     }
 

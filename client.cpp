@@ -6,7 +6,6 @@
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*)sa)->sin_addr);
-
 }
 
 // get socket port number (IPv4)
@@ -18,7 +17,7 @@ void get_in_port(struct sockaddr_storage &their_addr, char *port)
 }
 
 // convert a times buffer (times are separated by ' ') to a vector of strings
-vector<string> buf_to_vec(char *buf)
+vector<string> buf_to_string_vec(char *buf)
 {
     vector<string> times;
     char *time;
@@ -33,7 +32,7 @@ vector<string> buf_to_vec(char *buf)
 
 int main(int argc, const char* argv[]){
 
-    // get server M's tcp port's address information
+    // get server M's tcp port's address information ////////////////////////////////////////////////////////////////
     struct addrinfo hints, *servinfo, *p;
     int rv;
     memset(&hints, 0, sizeof hints);
@@ -68,9 +67,8 @@ int main(int argc, const char* argv[]){
         fprintf(stderr, "client: failed to connect\n");
         return 2;
     }
-    // printf("client: connecting to server\n");
 
-    // assign dyanmic port address to the client's tcp socket
+    // TODO: assign dyanmic port address to the client's tcp socket
     struct sockaddr_storage my_addr;
     socklen_t my_addrlen = sizeof my_addr;
     int getsock_check = getsockname(sockfd, (struct sockaddr*) &my_addr, (socklen_t *) &my_addrlen);
@@ -88,7 +86,7 @@ int main(int argc, const char* argv[]){
     // all done with this structure
     freeaddrinfo(servinfo); 
 
-    // ASK: receive 'ok' from the main server?
+    // TODO: receive 'ok' from the main server?
     char buf[20];
     int numbytes;
     if ((numbytes = recv(sockfd, buf, 19, 0)) == -1)
@@ -102,6 +100,8 @@ int main(int argc, const char* argv[]){
     // from backend servers to the main server, the client will be started
     // print boot up msg
     cout << "Client is up and running." << endl;
+
+    // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
     // wait for the usernames to be taken as inputs from the user 
     // user can enter up to 10 usernames, all of which are separated by a single space
@@ -153,7 +153,7 @@ int main(int argc, const char* argv[]){
     }
     buf3[numbytes] = '\0';
 
-    vector<string> intersects = buf_to_vec(buf3);
+    vector<string> intersects = buf_to_string_vec(buf3);
     
     // print on screen msg after receiving availability of all users in the meeting from the main server
     cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;

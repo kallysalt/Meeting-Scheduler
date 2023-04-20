@@ -126,12 +126,13 @@ void int_vec_to_buf(vector<int> &vec, char *buf)
 // identify the time slots that are available for all the requested users
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
 {
-    // handle the case when there is no user
+    // when there is no user
     if (names.size() == 0) 
     {
         return vector<int>();
     }
     
+    // when there is at least one user, initialize the intersects vector
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
@@ -142,13 +143,13 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.push_back(sched[k].second);
     }
 
-    // handle the case when there is only one user
+    // when there is only one user, return immediately
     if (names.size() == 1) 
     {
         return intersects;
     }
 
-    // handle the case when there are more than one users
+    // when there are more than one users, find the intersection iteratively
     for (int i = 1; i < names.size(); i++) 
     {
         name = names[i];
@@ -274,9 +275,7 @@ int main(int argc, const char* argv[])
         buf[numbytes] = '\0';
 
         // print correct on screen msg indicating the success of receiving usernames from the main server
-        if (numbytes != 0) {
-            cout << "Server B received the usernames from Main Server using UDP over port " << UDP_PORT_B << "." << endl;
-        } 
+        cout << "Server B received the usernames from Main Server using UDP over port " << UDP_PORT_B << "." << endl;
 
         // search in database to get all requested users' availability
         // make a copy of buf before calling strtok
@@ -286,14 +285,15 @@ int main(int argc, const char* argv[])
 
         // find the time intersection among them
         vector<int> intersects = find_intersection(names, scheds);
-        // handle the case when one of the user's sched is empty
+
+        // TODO: handle the case when one of the user's sched is empty
         if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
             intersects.clear();
         }
-        char intersects_buf[INTERSECTS_BUF_SIZE];
-        int_vec_to_buf(intersects, intersects_buf);
 
         // format and print the result
+        char intersects_buf[INTERSECTS_BUF_SIZE];
+        int_vec_to_buf(intersects, intersects_buf);
         if (names.size() != 0) 
         {
             cout << "Found the intersection result: ";
@@ -317,11 +317,8 @@ int main(int argc, const char* argv[])
             exit(1);
         }
 
-        // TODO: now is temp solution, need to change
-        if (names.size() != 0) 
-        {
-            cout << "Server B finished sending the response to Main Server." << endl;
-        }
+        // Print correct on screen msg indicating the success of sending the response to the main server
+        cout << "Server B finished sending the response to Main Server." << endl;
     }
 
     // free the linked-list
