@@ -267,6 +267,10 @@ int main(int argc, const char* argv[])
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
+    // handle the case when one of the user's sched is empty
+    if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
+        intersects.clear();
+    }
     char intersects_buf[INTERSECTS_BUF_SIZE];
     vec_to_buf(intersects, intersects_buf);
 
