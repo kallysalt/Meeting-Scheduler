@@ -161,7 +161,6 @@ void find_final_time_slots(vector<int> &times_a, vector<int> &times_b, char *buf
     int_vec_to_buf(final_times, buf);
 }
 
-
 int main(int argc, const char* argv[]){
 
     // print boot up msg
@@ -466,6 +465,8 @@ int main(int argc, const char* argv[]){
             // ASK: can i hardcode the server name here?
 
             // receive available time slots from different backend servers via udp
+            // ASK: will the order of receiving be the same as the order of sending?
+
             char times_buf_a[TIME_SLOTS_BUF_SIZE];
             memset(times_buf_a, 0, sizeof(times_buf_a));
             socklen_t addr_len_udp_a;
@@ -477,7 +478,18 @@ int main(int argc, const char* argv[]){
             }
             times_buf_a[numbytes] = '\0';
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
-            cout << times_buf_a << endl;
+            cout << "[";
+            vector<int> times_a = buf_to_vec(times_buf_a);
+            if (times_a.size() != 0) {
+                for (int i = 0; i < times_a.size(); i += 2) {
+                    cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
+                    // print "," if not the last element
+                    if (i != times_a.size() - 2) {
+                        cout << ",";
+                    }
+                }
+            }
+            cout << "]" << endl;
 
             char times_buf_b[TIME_SLOTS_BUF_SIZE];
             memset(times_buf_b, 0, sizeof(times_buf_b));
@@ -490,7 +502,18 @@ int main(int argc, const char* argv[]){
             }
             times_buf_b[numbytes] = '\0';
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
-            cout << times_buf_b << endl;
+            cout << "[";
+            vector<int> times_b = buf_to_vec(times_buf_b);
+            if (times_b.size() != 0) {
+                for (int i = 0; i < times_b.size(); i += 2) {
+                    cout << "[" << times_b[i] << "," << times_b[i + 1] << "]";
+                    // print "," if not the last element
+                    if (i != times_b.size() - 2) {
+                        cout << ",";
+                    }
+                }
+            }
+            cout << "]" << endl;
 
             // run an algo to get the final time slots that works for all participants
             // cout << "Found the intersection between the results from server A and B: <[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
