@@ -88,6 +88,7 @@ int main(int argc, const char* argv[]){
     // all done with this structure
     freeaddrinfo(servinfo); 
 
+    // ASK: receive 'ok' from the main server?
     char buf[20];
     int numbytes;
     if ((numbytes = recv(sockfd, buf, 19, 0)) == -1)
@@ -96,7 +97,6 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     buf[numbytes] = '\0';
-    // printf("client: received '%s'\n",buf);
 
     // after servers are booted up and required usernames are transferred 
     // from backend servers to the main server, the client will be started
@@ -129,19 +129,19 @@ int main(int argc, const char* argv[]){
     cout << "Client finished sending the usernames to Main Server." << endl;
 
     // receive a msg saying which usernames do not exist from the main server over tcp
-    char buf2[USERNAMES_BUF_SIZE];
-    if ((numbytes = recv(sockfd, buf2, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+    char invalid_buf[USERNAMES_BUF_SIZE];
+    if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
     {
         perror("client: recv");
         exit(1);
     }
-    buf2[numbytes] = '\0';
+    invalid_buf[numbytes] = '\0';
 
     // ASK: no print out if all exists
     // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
-    if (strcmp(buf2, "none") != 0) {
+    if (strcmp(invalid_buf, "none") != 0) {
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-        cout << buf2 << " do not exist." << endl;
+        cout << invalid_buf << " do not exist." << endl;
     }
 
     // receive time availability of all users in the meeting from the main server over tcp
@@ -167,8 +167,7 @@ int main(int argc, const char* argv[]){
             }
         }
     }
-    cout << "]>" << " works for " << "<username1, username2, ...>" << "." << endl;
-    // TODO: get valid usernames
+    cout << "]" << " works for " << "<username1, username2, ...>" << "." << endl;
     
     // start a new request 
     cout << "-----Start a new request-----" << endl;
