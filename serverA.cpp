@@ -115,6 +115,12 @@ void vec_to_buf(vector<int> &vec, char *buf)
 // identify the time slots that are available for all the requested users
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
 {
+    // handle the case when there is no user
+    if (names.size() == 0) 
+    {
+        return vector<int>();
+    }
+    
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
@@ -295,7 +301,7 @@ int main(int argc, const char* argv[])
     {
         cout << "Server A finished sending the response to Main Server." << endl;
     }
-    
+
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
 

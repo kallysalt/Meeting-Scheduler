@@ -268,7 +268,6 @@ int main(int argc, const char* argv[])
     char names_buf[USERNAMES_BUF_SIZE];
     strcpy(names_buf, buf);
     vector<string> names = buf_to_vec(buf);
-    cout << names.size() << endl;
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
