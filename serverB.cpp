@@ -280,19 +280,22 @@ int main(int argc, const char* argv[])
     vec_to_buf(intersects, intersects_buf);
 
     // format and print the result
-    cout << "Found the intersection result: ";
-    cout << "[";
-    if (intersects.size() != 0) {
+    if (intersects.size() != 0) 
+    {
+        cout << "Found the intersection result: ";
+        cout << "[";    
+
         for (int i = 0; i < intersects.size(); i += 2) {
             cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
             // print "," if not the last element
-            if (i != intersects.size() - 2) {
+            if (i != intersects.size() - 2) 
+            {
                 cout << ",";
             }
         }
+        cout << "] for " << names_buf << "." << endl;
     }
-    cout << "] for " << names_buf << "." << endl;
-
+    
     // send the result back to the main server
     if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
