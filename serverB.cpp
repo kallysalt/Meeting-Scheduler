@@ -184,10 +184,10 @@ int main(int argc, const char* argv[])
     // print boot up msg ////////////////////////////////////////////////////////////////////////////////////////////
     cout << "Server B is up and running using UDP on port " << UDP_PORT_B << "." << endl; 
 
-    // read input file and store the information in a data structure
+    // read input file and store the information in a data structure (from beej's guide)
     schedules scheds = read_input_file("b.txt");
 
-    // get itself's (server B udp port) address information
+    // get itself's (server B udp port) address information (from beej's guide)
     struct addrinfo hints_udp_b, *servinfo_udp_b;
     int rv_udp_b;
     memset(&hints_udp_b, 0, sizeof hints_udp_b);
@@ -200,7 +200,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // loop through all the results and make a udp socket
+    // loop through all the results and make a udp socket (from beej's guide)
     int sockfd;
     struct addrinfo *p_udp_b;
     for (p_udp_b = servinfo_udp_b; p_udp_b != NULL; p_udp_b = p_udp_b->ai_next) 
@@ -219,7 +219,7 @@ int main(int argc, const char* argv[])
         break;
     }
 
-    // handle error cases
+    // handle error cases (from beej's guide)
     if (p_udp_b == NULL) 
     { 
         fprintf(stderr, "serverB talker: failed to create socket\n");
@@ -229,7 +229,7 @@ int main(int argc, const char* argv[])
     // free the linked-list
     freeaddrinfo(servinfo_udp_b); 
 
-    // get receiver's (server M udp port) address information
+    // get receiver's (server M udp port) address information (from beej's guide)
     struct addrinfo hints_udp_m, *servinfo_udp_m;
     int rv_udp_m;
     memset(&hints_udp_m, 0, sizeof hints_udp_m);
@@ -261,7 +261,7 @@ int main(int argc, const char* argv[])
 
     while (1) 
     {
-        // receive users from main server via udp over specified port
+        // receive users from main server via udp over specified port (from beej's guide)
         char buf[USERNAMES_BUF_SIZE];
         memset(buf, 0, sizeof(buf));
         struct sockaddr_storage their_addr;
@@ -310,7 +310,7 @@ int main(int argc, const char* argv[])
             cout << "] for " << names_buf << "." << endl;
         }
 
-        // send the result back to the main server
+        // send the result back to the main server (from beej's guide)
         if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
         {
             perror("serverB talker: sendto");
@@ -321,7 +321,7 @@ int main(int argc, const char* argv[])
         cout << "Server B finished sending the response to Main Server." << endl;
     }
 
-    // free the linked-list
+    // free the linked-list (from beej's guide)
     freeaddrinfo(servinfo_udp_m); 
 
     close(sockfd);

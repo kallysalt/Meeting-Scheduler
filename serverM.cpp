@@ -9,13 +9,13 @@
 set<string> userset_a;
 set<string> userset_b;
 
-// get sockaddr (IPv4)
+// get sockaddr (IPv4) (from beej's guide)
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*) sa)->sin_addr);
 }
 
-// get socket port number (IPv4)
+// get socket port number (IPv4) (from beej's guide)
 void get_in_port(struct sockaddr_storage &their_addr, char *port) 
 {
     sockaddr *sa = (struct sockaddr *) &their_addr;
@@ -23,7 +23,7 @@ void get_in_port(struct sockaddr_storage &their_addr, char *port)
     sprintf(port, "%u", port_num);
 }
 
-// signal handler
+// signal handler (from beej's guide)
 void sigchld_handler(int s)
 {
     // waitpid() might overwrite errno, so we save and restore it:
@@ -171,7 +171,7 @@ int main(int argc, const char* argv[]){
     // print boot up msg ////////////////////////////////////////////////////////////////////////////////////////////
     cout << "Main Server is up and running." << endl;
 
-    // get server M's udp port's address information
+    // get server M's udp port's address information (from beej's guide)
     struct addrinfo hints_udp_m, *servinfo_udp_m , *p_udp_m;
     int rv_udp_m;
     memset(&hints_udp_m, 0, sizeof hints_udp_m);
@@ -184,7 +184,7 @@ int main(int argc, const char* argv[]){
         return 1;
     }
 
-    // loop through all the results and make a socket for server M's udp port
+    // loop through all the results and make a socket for server M's udp port (from beej's guide)
     int sockfd_udp_m;
     for (p_udp_m = servinfo_udp_m ; p_udp_m != NULL; p_udp_m = p_udp_m->ai_next) 
     {
@@ -202,21 +202,21 @@ int main(int argc, const char* argv[]){
         break;
     }
 
-    // handle error cases
+    // handle error cases (from beej's guide)
     if (p_udp_m == NULL) 
     { 
         fprintf(stderr, "serverM udp: failed to create socket\n");
         return 2;
     }
 
-    // free the linked-list
+    // free the linked-list (from beej's guide)
     freeaddrinfo(servinfo_udp_m); 
 
-    // initialize server A and server B's udp port's address information
+    // initialize server A and server B's udp port's address information (from beej's guide)
     struct sockaddr_storage addr_udp_a;
     struct sockaddr_storage addr_udp_b;
 
-    // receive usernames sent from server A/B via udp over UDP_PORT_M 
+    // receive usernames sent from server A/B via udp over UDP_PORT_M (from beej's guide)
     struct sockaddr_storage their_addr_udp;
     socklen_t udp_addr_len = sizeof their_addr_udp;
     char names_buf[USERNAMES_BUF_SIZE];
@@ -253,7 +253,7 @@ int main(int argc, const char* argv[]){
         cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
     }
     
-    // receive usernames sent from server A/B via udp over UDP_PORT_M 
+    // receive usernames sent from server A/B via udp over UDP_PORT_M (from beej's guide)
     memset(names_buf, 0, sizeof(names_buf));
     if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
         (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
@@ -283,7 +283,7 @@ int main(int argc, const char* argv[]){
         cout << "Main Server received the username list from server B using UDP over " << UDP_PORT_M << "." << endl;
     }
 
-    // get server M's tcp port's address information
+    // get server M's tcp port's address information (from beej's guide)
     struct addrinfo hints_tcp_m, *servinfo_tcp_m, *p_tcp_m;
     int rv_tcp_m;
     memset(&hints_tcp_m, 0, sizeof hints_tcp_m);
@@ -296,7 +296,7 @@ int main(int argc, const char* argv[]){
         return 1;
     }
 
-    // loop through all the results and bind to the first we can
+    // loop through all the results and bind to the first we can (from beej's guide)
     int sockfd_tcp_m;  // listen on sock_fd
     int yes = 1;
     for (p_tcp_m = servinfo_tcp_m; p_tcp_m != NULL; p_tcp_m = p_tcp_m->ai_next) 
@@ -320,24 +320,24 @@ int main(int argc, const char* argv[]){
         break;
     }
 
-    // all done with this structure
+    // all done with this structure (from beej's guide)
     freeaddrinfo(servinfo_tcp_m); 
 
-    // handle error cases
+    // handle error cases (from beej's guide)
     if (p_tcp_m == NULL)  
     {
         fprintf(stderr, "serverM tcp: failed to bind\n");
         exit(1);
     }
 
-    // listen() for incoming connection from the client
+    // listen() for incoming connection from the client (from beej's guide)
     if (listen(sockfd_tcp_m, BACKLOG) == -1) 
     {
         perror("listen");
         exit(1);
     }
     
-    // prepare for accepting tcp connections from the client
+    // prepare for accepting tcp connections from the client (from beej's guide)
     socklen_t sin_size;
     struct sigaction sa;
     sa.sa_handler = sigchld_handler; // reap all dead processes
@@ -349,7 +349,7 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
 
-    while (1) // main accept loop
+    while (1) // main accept loop (from beej's guide)
     {  
         int new_fd; // new connection on new_fd
         struct sockaddr_storage their_addr_tcp; // connector's address information
@@ -361,7 +361,7 @@ int main(int argc, const char* argv[]){
             continue;
         }
 
-        if (!fork()) // this is the child process
+        if (!fork()) // this is the child process (from beej's guide)
         { 
             close(sockfd_tcp_m); // child doesn't need the listener
             if (send(new_fd, "start client!", 13, 0) == -1) 
@@ -373,7 +373,7 @@ int main(int argc, const char* argv[]){
 
             // TODO: another while loop?
 
-            // receive names sent from client via tcp
+            // receive names sent from client via tcp (from beej's guide)
             char names_buf[USERNAMES_BUF_SIZE];
             memset(names_buf, 0, sizeof(names_buf));
             if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
@@ -456,7 +456,7 @@ int main(int argc, const char* argv[]){
             vector<int> times_a;
             if (users_a.size() > 0) 
             {
-                // send names managed by server A to server A
+                // send names managed by server A to server A (from beej's guide)
                 if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
                 {
                     perror("serverM udp: sendto");
@@ -466,7 +466,7 @@ int main(int argc, const char* argv[]){
                 if (numbytes > 0) {
                     cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
                 }
-                // receive timeslots from server A
+                // receive timeslots from server A (from beej's guide)
                 if ((numbytes = recvfrom(sockfd_udp_m, times_buf_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
                 {
                     perror("serverM udp: recvfrom");
@@ -504,7 +504,7 @@ int main(int argc, const char* argv[]){
             vector<int> times_b;
             if (users_b.size() > 0) 
             {
-                // send names managed by server B to server B
+                // send names managed by server B to server B (from beej's guide)
                 if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
                 {
                     perror("serverM udp: sendto");
@@ -515,7 +515,7 @@ int main(int argc, const char* argv[]){
                 {
                     cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
                 }
-                // receive timeslots from server B
+                // receive timeslots from server B (from beej's guide)
                 if ((numbytes = recvfrom(sockfd_udp_m, times_buf_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
                 {
                     perror("serverM udp: recvfrom");
@@ -567,7 +567,7 @@ int main(int argc, const char* argv[]){
             }
             cout << "]." << endl;
 
-            // send the result back to the client via tcp
+            // send the result back to the client via tcp (from beej's guide)
             char intersects_buf[INTERSECTS_BUF_SIZE];
             int_vec_to_buf(intersects, intersects_buf);
             if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
@@ -578,10 +578,9 @@ int main(int argc, const char* argv[]){
             // print correct on screen msg after sending the final time slots
             cout << "Main Server sent the result to the client." << endl;
 
-            // TODO: send valid usernames to client 
+            // TODO: send valid usernames to client (from beej's guide)
             char valid_users_buf[CLIENT_MAXDATASIZE];
             str_vec_to_buf(valid_users, valid_users_buf);
-            cout << valid_users_buf << endl;
             if (send(new_fd, valid_users_buf, strlen(valid_users_buf), 0) == -1) 
             {
                 perror("client: send");
@@ -590,7 +589,7 @@ int main(int argc, const char* argv[]){
             close(new_fd);
             exit(0);
         }
-        close(new_fd);  // parent doesn't need this
+        close(new_fd);  // parent doesn't need this (from beej's guide)
     }
 
     close(sockfd_udp_m);

@@ -2,13 +2,13 @@
 
 #include "project.h"
 
-// get sockaddr (IPv4)
+// get sockaddr (IPv4) (from beej's guide)
 void *get_in_addr(struct sockaddr *sa)
 {
     return &(((struct sockaddr_in*)sa)->sin_addr);
 }
 
-// get socket port number (IPv4)
+// get socket port number (IPv4) (from beej's guide)
 void get_in_port(struct sockaddr_storage &their_addr, char *port) 
 {
     sockaddr *sa = (struct sockaddr *) &their_addr;
@@ -33,6 +33,7 @@ vector<string> buf_to_string_vec(char *buf)
 int main(int argc, const char* argv[]){
 
     // get server M's tcp port's address information ////////////////////////////////////////////////////////////////
+    // (from beej's guide)
     struct addrinfo hints, *servinfo, *p;
     int rv;
     memset(&hints, 0, sizeof hints);
@@ -44,7 +45,7 @@ int main(int argc, const char* argv[]){
         return 1;
     }
 
-    // loop through all the results and connect to the first we can
+    // loop through all the results and connect to the first we can (from beej's guide)
     int sockfd;  
     for (p = servinfo; p != NULL; p = p->ai_next) 
     {
@@ -61,7 +62,7 @@ int main(int argc, const char* argv[]){
         break;
     }
 
-    // handle error cases
+    // handle error cases (from beej's guide)
     if (p == NULL) 
     {
         fprintf(stderr, "client: failed to connect\n");
@@ -77,16 +78,16 @@ int main(int argc, const char* argv[]){
     char tcp_port_client[10];
     get_in_port(my_addr, tcp_port_client);
 
-    // error checking
+    // error checking (from beej's guide)
     if (getsock_check== -1) {
         perror("getsockname");
         exit(1);
     }
 
-    // all done with this structure
+    // all done with this structure (from beej's guide)
     freeaddrinfo(servinfo); 
 
-    // TODO: receive 'ok' from the main server?
+    // TODO: receive 'ok' from the main server? (from beej's guide)
     char buf[20];
     int numbytes;
     if ((numbytes = recv(sockfd, buf, 19, 0)) == -1)
@@ -103,9 +104,8 @@ int main(int argc, const char* argv[]){
 
     // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
-    // wait for the usernames to be taken as inputs from the user 
+    // wait for the usernames to be taken as inputs from the user (from beej's guide)
     // user can enter up to 10 usernames, all of which are separated by a single space
-    int flag = 1;
     string input;
     while (1) 
     {
@@ -113,7 +113,7 @@ int main(int argc, const char* argv[]){
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
 
-        // send these names to the main server over tcp
+        // send these names to the main server over tcp (from beej's guide)
         if (send(sockfd, input.c_str(), input.length(), 0) == -1)
         {
             perror("client: send");
@@ -123,7 +123,7 @@ int main(int argc, const char* argv[]){
         // print on screen msg after sending usernames to the main server
         cout << "Client finished sending the usernames to Main Server." << endl;
 
-        // receive a msg saying which usernames do not exist from the main server over tcp
+        // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
         if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
@@ -145,7 +145,7 @@ int main(int argc, const char* argv[]){
             cout << invalid_buf << " do not exist." << endl;
         }
 
-        // wait for time availability of all users in the meeting from the main server over tcp
+        // wait for time availability of all users in the meeting from the main server over tcp (from beej's guide)
         char intersects_buf[INTERSECTS_BUF_SIZE];
         if ((numbytes = recv(sockfd, intersects_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
@@ -154,13 +154,15 @@ int main(int argc, const char* argv[]){
         }
         intersects_buf[numbytes] = '\0';
 
-        // TODO: receive valid users buf from the main server
+        // TODO: receive valid users buf from the main server (from beej's guide)
         char valid_buf[USERNAMES_BUF_SIZE];
         if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
             perror("client: recv");
             exit(1);
         }
+        valid_buf[numbytes] = '\0';
+        cout << valid_buf << endl;
 
         // print on screen msg after receiving availability of all users in the meeting from the main server
         vector<string> intersects = buf_to_string_vec(intersects_buf);

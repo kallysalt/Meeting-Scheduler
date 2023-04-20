@@ -187,7 +187,7 @@ int main(int argc, const char* argv[])
     // read input file and store the information in a data structure
     schedules scheds = read_input_file("a.txt");
 
-    // get itself's (server A udp port) address information
+    // get itself's (server A udp port) address information (from beej's guide)
     struct addrinfo hints_udp_a, *servinfo_udp_a;
     int rv_udp_a;
     memset(&hints_udp_a, 0, sizeof hints_udp_a);
@@ -200,7 +200,7 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
-    // loop through all the results and make a udp socket
+    // loop through all the results and make a udp socket (from beej's guide)
     int sockfd;
     struct addrinfo *p_udp_a;
     for (p_udp_a = servinfo_udp_a; p_udp_a != NULL; p_udp_a = p_udp_a->ai_next) 
@@ -219,17 +219,17 @@ int main(int argc, const char* argv[])
         break;
     }
 
-    // handle error cases
+    // handle error cases (from beej's guide)
     if (p_udp_a == NULL) 
     { 
         fprintf(stderr, "serverA talker: failed to create socket\n");
         return 2;
     }
 
-    // free the linked-list
+    // free the linked-list (from beej's guide)
     freeaddrinfo(servinfo_udp_a); 
 
-    // get receiver's (server M udp port) address information
+    // get receiver's (server M udp port) address information (from beej's guide)
     struct addrinfo hints_udp_m, *servinfo_udp_m;
     int rv_udp_m;
     memset(&hints_udp_m, 0, sizeof hints_udp_m);
@@ -247,7 +247,7 @@ int main(int argc, const char* argv[])
     memset(usernames, 0, sizeof(usernames));
     schedules_to_names_buf(scheds, usernames);
 
-    // send all usernames it has to server M via udp over specified port
+    // send all usernames it has to server M via udp over specified port (from beej's guide)
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
         perror("serverA talker: sendto");
@@ -261,7 +261,7 @@ int main(int argc, const char* argv[])
 
     while (1) 
     {
-        // receive users from main server via udp over specified port
+        // receive users from main server via udp over specified port (from beej's guide)
         char buf[USERNAMES_BUF_SIZE];
         memset(buf, 0, sizeof(buf));
         struct sockaddr_storage their_addr;
@@ -310,7 +310,7 @@ int main(int argc, const char* argv[])
             cout << "] for " << names_buf << "." << endl;
         }
 
-        // send the result back to the main server
+        // send the result back to the main server (from beej's guide)
         if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
         {
             perror("serverA talker: sendto");
@@ -321,7 +321,7 @@ int main(int argc, const char* argv[])
         cout << "Server A finished sending the response to Main Server." << endl;
     }
 
-    // free the linked-list
+    // free the linked-list (from beej's guide)
     freeaddrinfo(servinfo_udp_m); 
 
     close(sockfd);
