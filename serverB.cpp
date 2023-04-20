@@ -279,7 +279,7 @@ int main(int argc, const char* argv[])
     vec_to_buf(intersects, intersects_buf);
 
     // format and print the result
-    if (intersects.size() != 0) 
+    if (names.size() != 0) 
     {
         cout << "Found the intersection result: ";
         cout << "[";    
@@ -303,7 +303,7 @@ int main(int argc, const char* argv[])
     }
 
     // TODO: now is temp solution, need to change
-    if (intersects.size() != 0) 
+    if (names.size() != 0) 
     {
         cout << "Server B finished sending the response to Main Server." << endl;
     }
