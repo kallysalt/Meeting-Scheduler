@@ -98,6 +98,70 @@ void vec_to_buf(vector<string> &vec, char *buf)
     }
 }
 
+// convert a times buffer (times are separated by ' ') to a vector of integers
+vector<int> buf_to_vec(char *buf)
+{
+    vector<int> times;
+    char *time;
+    time = strtok(buf, " ");
+    while (time != NULL) 
+    {
+        times.push_back(atoi(time));
+        time = strtok(NULL, " ");
+    }
+    return times;
+}
+
+// convert a vector of integers to a buffer (integers are separated by ' ')
+void int_vec_to_buf(vector<int> &vec, char *buf)
+{
+    char* curr = buf;
+    for (size_t i = 0; i < vec.size(); i++) 
+    {
+        stringstream ss;
+        ss << vec[i];
+        const string &str = ss.str();
+
+        copy(str.begin(), str.end(), curr);
+        curr += str.size();
+        // add a space after each string, except the last one
+        if (i < vec.size() - 1) {
+            *curr = ' ';
+            curr++;
+        }
+        // add a null-terminator after the last one
+        else{
+            *curr = '\0';
+        }
+    }
+}
+
+// find final time slots
+void find_final_time_slots(vector<int> &times_a, vector<int> &times_b, char *buf)
+{
+    vector<int> final_times;
+    for (size_t i = 0; i < times_a.size(); i++) 
+    {
+        for (size_t j = 0; j < times_b.size(); j++) 
+        {
+            int x_start = times_a[i];
+            int x_end = times_a[i + 1];
+            int y_start = times_b[j];
+            int y_end = times_b[j + 1];
+
+            // check if there is an intersection
+            if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
+            {
+                final_times.push_back(max(x_start, y_start));
+                final_times.push_back(min(x_end, y_end));
+            }
+        }
+    }
+    // convert final times to a buffer
+    int_vec_to_buf(final_times, buf);
+}
+
+
 int main(int argc, const char* argv[]){
 
     // print boot up msg
@@ -401,38 +465,47 @@ int main(int argc, const char* argv[]){
             }
             // ASK: can i hardcode the server name here?
 
-            // receive time slots from different backend servers via udp
-            char time_slots_a[TIME_SLOTS_BUF_SIZE];
-            memset(time_slots_a, 0, sizeof(time_slots_a));
+            // receive available time slots from different backend servers via udp
+            char times_buf_a[TIME_SLOTS_BUF_SIZE];
+            memset(times_buf_a, 0, sizeof(times_buf_a));
             socklen_t addr_len_udp_a;
             addr_len_udp_a = sizeof addr_udp_a;
-            if ((numbytes = recvfrom(sockfd_udp_m, time_slots_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
+            if ((numbytes = recvfrom(sockfd_udp_m, times_buf_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
             {
                 perror("serverM udp: recvfrom");
                 exit(1);
             }
-            time_slots_a[numbytes] = '\0';
+            times_buf_a[numbytes] = '\0';
+            cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
+            cout << times_buf_a << endl;
 
-            char time_slots_b[TIME_SLOTS_BUF_SIZE];
-            memset(time_slots_b, 0, sizeof(time_slots_b));
+            char times_buf_b[TIME_SLOTS_BUF_SIZE];
+            memset(times_buf_b, 0, sizeof(times_buf_b));
             socklen_t addr_len_udp_b;
             addr_len_udp_b = sizeof addr_udp_b;
-            if ((numbytes = recvfrom(sockfd_udp_m, time_slots_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
+            if ((numbytes = recvfrom(sockfd_udp_m, times_buf_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
             {
                 perror("serverM udp: recvfrom");
                 exit(1);
             }
-            time_slots_b[numbytes] = '\0';
-
-            // receive available time slots from different backend servers via udp
-            // cout << "Main Server received from server <A or B> the intersection result using UDP over port <port number>:" << endl;
-            // cout << "<[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
+            times_buf_b[numbytes] = '\0';
+            cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
+            cout << times_buf_b << endl;
 
             // run an algo to get the final time slots that works for all participants
             // cout << "Found the intersection between the results from server A and B: <[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
+            vector<int> times_a = buf_to_vec(times_buf_a);
+            vector<int> times_b = buf_to_vec(times_buf_b);
+            char intersects_buf[INTERSECTS_BUF_SIZE];
+            find_final_time_slots(times_a, times_b, intersects_buf);
             
             // sends the result back to the client via tcp
-            // cout << "Main Server sent the result to the client." << endl;
+            if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
+            {
+                perror("client: send");
+            }
+            cout << "Main Server sent the result to the client." << endl;
+
 
             close(new_fd);
             exit(0);

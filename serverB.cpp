@@ -282,8 +282,13 @@ int main(int argc, const char* argv[])
     }
     cout << "] for " << names_buf << "." << endl;
 
-    // // send the result back to the main server
-    // cout << "Server B finished sending the response to Main Server." << endl;
+    // send the result back to the main server
+    if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+    {
+        perror("serverB talker: sendto");
+        exit(1);
+    }
+    cout << "Server B finished sending the response to Main Server." << endl;
 
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 

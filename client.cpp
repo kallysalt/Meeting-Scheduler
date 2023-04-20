@@ -17,6 +17,20 @@ void get_in_port(struct sockaddr_storage &their_addr, char *port)
     sprintf(port, "%u", port_num);
 }
 
+// convert a times buffer (times are separated by ' ') to a vector of strings
+vector<string> buf_to_vec(char *buf)
+{
+    vector<string> times;
+    char *time;
+    time = strtok(buf, " ");
+    while (time != NULL) 
+    {
+        times.push_back(string(time));
+        time = strtok(NULL, " ");
+    }
+    return times;
+}
+
 int main(int argc, const char* argv[]){
 
     // get server M's tcp port's address information
@@ -131,14 +145,34 @@ int main(int argc, const char* argv[]){
     }
 
     // receive time availability of all users in the meeting from the main server over tcp
+    char buf3[INTERSECTS_BUF_SIZE];
+    if ((numbytes = recv(sockfd, buf3, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+    {
+        perror("client: recv");
+        exit(1);
+    }
+    buf3[numbytes] = '\0';
+
+    vector<string> intersects = buf_to_vec(buf3);
     
     // print on screen msg after receiving availability of all users in the meeting from the main server
-    // cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-    // cout << "Time intervals " << "<[[t1_start, t1_end], [t2_start, t2_end], ... ]>" << " works for " << "<username1, username2, ...>" << "." << endl;
+    cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
+    cout << "Time intervals [";
+    if (intersects.size() != 0) {
+        for (int i = 0; i < intersects.size(); i += 2) {
+            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+            // print "," if not the last element
+            if (i != intersects.size() - 2) {
+                cout << ",";
+            }
+        }
+    }
+    cout << "]>" << " works for " << "<username1, username2, ...>" << "." << endl;
+    // TODO: get valid usernames
     
     // start a new request 
-    // cout << "-----Start a new request-----" << endl;
-    // cout << "Please enter the usernames to check schedule availability:" << endl;
+    cout << "-----Start a new request-----" << endl;
+    cout << "Please enter the usernames to check schedule availability:" << endl;
 
     close(sockfd);
     return 0;
