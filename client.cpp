@@ -154,6 +154,14 @@ int main(int argc, const char* argv[]){
         }
         intersects_buf[numbytes] = '\0';
 
+        // TODO: receive valid users buf from the main server
+        char valid_buf[USERNAMES_BUF_SIZE];
+        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+
         // print on screen msg after receiving availability of all users in the meeting from the main server
         vector<string> intersects = buf_to_string_vec(intersects_buf);
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
@@ -167,8 +175,8 @@ int main(int argc, const char* argv[]){
                 }
             }
         }
-        // TODO: print put valid names
-        cout << "]" << " works for " << "<username1, username2, ...>" << "." << endl;
+        // printxw valid names
+        cout << "]" << " works for " << valid_buf << "." << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;

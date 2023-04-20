@@ -574,6 +574,14 @@ int main(int argc, const char* argv[]){
             {
                 perror("client: send");
             }
+
+            // TODO: send valid usernames to client 
+            char valid_users_buf[CLIENT_MAXDATASIZE];
+            str_vec_to_buf(valid_users, valid_users_buf);
+            if (send(new_fd, valid_users_buf, strlen(valid_users_buf), 0) == -1) 
+            {
+                perror("client: send");
+            }
             
             // print correct on screen msg after sending the final time slots
             cout << "Main Server sent the result to the client." << endl;
