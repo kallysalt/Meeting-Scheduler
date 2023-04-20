@@ -158,11 +158,8 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.clear();
         intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
     }
-    // print out the intersection
-    cout << "The possible time slots for " << name << " are: ";
-    for (int i = 0; i < intersects.size(); i += 2) {
-        cout << "[" << intersects[i] << "," << intersects[i + 1] << "] ";
-    }
+     // print out the intersection size 
+    cout << "The server B has found " << intersects.size() / 2 << " time slots." << endl;
     return intersects;
 }
 
