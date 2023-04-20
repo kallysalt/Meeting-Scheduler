@@ -107,73 +107,73 @@ int main(int argc, const char* argv[]){
     // user can enter up to 10 usernames, all of which are separated by a single space
     int flag = 1;
     string input;
-    while (flag) 
+    while (1) 
     {
         // show a prompt: Please enter the usernames to check schedule availability:
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
 
-        // TODO: if the none of the input is valid, keep requesting for client input
+        // send these names to the main server over tcp
+        if (send(sockfd, input.c_str(), input.length(), 0) == -1)
+        {
+            perror("client: send");
+            exit(1);
+        }
 
-        flag = 0;
-    }
+        // print on screen msg after sending usernames to the main server
+        cout << "Client finished sending the usernames to Main Server." << endl;
 
-    // send these names to the main server over tcp
-    if (send(sockfd, input.c_str(), input.length(), 0) == -1)
-    {
-        perror("client: send");
-        exit(1);
-    }
+        // receive a msg saying which usernames do not exist from the main server over tcp
+        char invalid_buf[USERNAMES_BUF_SIZE];
+        if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+        invalid_buf[numbytes] = '\0';
 
-    // print on screen msg after sending usernames to the main server
-    cout << "Client finished sending the usernames to Main Server." << endl;
+        // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
+        if (strcmp(invalid_buf, "none") != 0) {
+            cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
+            cout << invalid_buf << " do not exist." << endl;
+        }
 
-    // receive a msg saying which usernames do not exist from the main server over tcp
-    char invalid_buf[USERNAMES_BUF_SIZE];
-    if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-    {
-        perror("client: recv");
-        exit(1);
-    }
-    invalid_buf[numbytes] = '\0';
+        // TODO: if none of the usernames is valid, stop this iteration to request for another client input
+        if (strcmp(invalid_buf, input.c_str()) == 0) 
+        {
+            // TODO: print some error msg?
+            continue;
+        }
 
-    // ASK: no print out if all exists
-    // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
-    if (strcmp(invalid_buf, "none") != 0) {
+        // otherwise, wait for time availability of all users in the meeting from the main server over tcp
+        char intersects_buf[INTERSECTS_BUF_SIZE];
+        if ((numbytes = recv(sockfd, intersects_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+        intersects_buf[numbytes] = '\0';
+
+        // print on screen msg after receiving availability of all users in the meeting from the main server
+        vector<string> intersects = buf_to_string_vec(intersects_buf);
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-        cout << invalid_buf << " do not exist." << endl;
-    }
-
-    // receive time availability of all users in the meeting from the main server over tcp
-    char buf3[INTERSECTS_BUF_SIZE];
-    if ((numbytes = recv(sockfd, buf3, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-    {
-        perror("client: recv");
-        exit(1);
-    }
-    buf3[numbytes] = '\0';
-
-    vector<string> intersects = buf_to_string_vec(buf3);
-    
-    // print on screen msg after receiving availability of all users in the meeting from the main server
-    cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-    cout << "Time intervals [";
-    if (intersects.size() != 0) {
-        for (int i = 0; i < intersects.size(); i += 2) {
-            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
-            // print "," if not the last element
-            if (i != intersects.size() - 2) {
-                cout << ",";
+        cout << "Time intervals [";
+        if (intersects.size() != 0) {
+            for (int i = 0; i < intersects.size(); i += 2) {
+                cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+                // print "," if not the last element
+                if (i != intersects.size() - 2) {
+                    cout << ",";
+                }
             }
         }
+        // TODO: print put valid names
+        cout << "]" << " works for " << "<username1, username2, ...>" << "." << endl;
+
+        // start a new request 
+        cout << "-----Start a new request-----" << endl;
     }
-    cout << "]" << " works for " << "<username1, username2, ...>" << "." << endl;
-    
-    // start a new request 
-    cout << "-----Start a new request-----" << endl;
-    cout << "Please enter the usernames to check schedule availability:" << endl;
 
     close(sockfd);
     return 0;
 }
-
