@@ -128,8 +128,6 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
     // handle the case when there is only one user
     if (names.size() == 1) 
     {
-        // print out the intersection size 
-        cout << "The server A has found " << intersects.size() / 2 << " time slots." << endl;
         return intersects;
     }
 
