@@ -132,20 +132,20 @@ int main(int argc, const char* argv[]){
         }
         invalid_buf[numbytes] = '\0';
 
-        // if there are usernames that do not exist, print: <username1, username2, ...> do not exist
-        if (strcmp(invalid_buf, "none") != 0) {
-            cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
-            cout << invalid_buf << " do not exist." << endl;
-        }
-
         // TODO: if none of the usernames is valid, stop this iteration to request for another client input
-        if (strcmp(invalid_buf, input.c_str()) == 0) 
+        if (strcmp(invalid_buf, "fail") == 0) 
         {
             // TODO: print some error msg?
             continue;
         }
 
-        // otherwise, wait for time availability of all users in the meeting from the main server over tcp
+        // if some of the usernames do not exist, print: <username1, username2, ...> do not exist
+        if (strcmp(invalid_buf, "pass") != 0) {
+            cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
+            cout << invalid_buf << " do not exist." << endl;
+        }
+
+        // wait for time availability of all users in the meeting from the main server over tcp
         char intersects_buf[INTERSECTS_BUF_SIZE];
         if ((numbytes = recv(sockfd, intersects_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {

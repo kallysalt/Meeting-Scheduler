@@ -75,8 +75,8 @@ void validate_client_input(char *buf, vector<string> &invalid, vector<string> &v
     }
 }
 
-// convert a vector of strings to a names buffer (names are separated by ', ')
-void vec_to_buf(vector<string> &vec, char *buf)
+// convert a vector of strings (names) to a buffer (names are separated by ', ')
+void str_vec_to_buf(vector<string> &vec, char *buf)
 {
     char* curr = buf;
     for (size_t i = 0; i < vec.size(); i++) 
@@ -98,21 +98,7 @@ void vec_to_buf(vector<string> &vec, char *buf)
     }
 }
 
-// convert a times buffer (times are separated by ' ') to a vector of integers
-vector<int> buf_to_vec(char *buf)
-{
-    vector<int> times;
-    char *time;
-    time = strtok(buf, " ");
-    while (time != NULL) 
-    {
-        times.push_back(atoi(time));
-        time = strtok(NULL, " ");
-    }
-    return times;
-}
-
-// convert a vector of integers to a buffer (integers are separated by ' ')
+// convert a vector of integers (times) to a buffer (integers are separated by ' ')
 void int_vec_to_buf(vector<int> &vec, char *buf)
 {
     char* curr = buf;
@@ -136,10 +122,30 @@ void int_vec_to_buf(vector<int> &vec, char *buf)
     }
 }
 
+// convert a buffer (times separated by ' ') to a vector of integers
+vector<int> buf_to_int_vec(char *buf)
+{
+    vector<int> times;
+    char *time;
+    time = strtok(buf, " ");
+    while (time != NULL) 
+    {
+        times.push_back(atoi(time));
+        time = strtok(NULL, " ");
+    }
+    return times;
+}
+
 // find final time slots
-void find_final_time_slots(vector<int> &times_a, vector<int> &times_b, char *buf)
+vector<int> find_final_time_slots(vector<int> &times_a, vector<int> &times_b)
 {
     vector<int> final_times;
+    // if any of the users has no time slots, return immediately
+    if (times_a.size() == 0 || times_b.size() == 0) 
+    {
+        return final_times;
+    }
+    // otherwise, find intersection of time slots
     for (size_t i = 0; i < times_a.size(); i+=2) 
     {
         for (size_t j = 0; j < times_b.size(); j+=2) 
@@ -157,13 +163,12 @@ void find_final_time_slots(vector<int> &times_a, vector<int> &times_b, char *buf
             }
         }
     }
-    // convert final times to a buffer
-    int_vec_to_buf(final_times, buf);
+    return final_times;
 }
 
 int main(int argc, const char* argv[]){
 
-    // print boot up msg
+    // print boot up msg ////////////////////////////////////////////////////////////////////////////////////////////
     cout << "Main Server is up and running." << endl;
 
     // get server M's udp port's address information
@@ -224,6 +229,8 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     names_buf[numbytes] = '\0';
+
+    // TODO: are both servers guaranteed to send at least one username?
 
     // check which server sent the usernames
     char src_port[10]; // ?
@@ -341,10 +348,8 @@ int main(int argc, const char* argv[]){
         perror("sigaction");
         exit(1);
     }
-    // printf("serverM tcp: waiting for connections...\n");
 
-    // main accept() loop
-    while (1) 
+    while (1) // main accept loop
     {  
         int new_fd; // new connection on new_fd
         struct sockaddr_storage their_addr_tcp; // connector's address information
@@ -355,7 +360,6 @@ int main(int argc, const char* argv[]){
             perror("accept");
             continue;
         }
-        // printf("server: got connection");
 
         if (!fork()) // this is the child process
         { 
@@ -364,6 +368,10 @@ int main(int argc, const char* argv[]){
             {
                 perror("client: send");
             }
+
+            // set up finishes /////////////////////////////////////////////////////////////////////////////////////
+
+            // TODO: another while loop?
 
             // receive names sent from client via tcp
             char names_buf[USERNAMES_BUF_SIZE];
@@ -374,7 +382,6 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             names_buf[numbytes] = '\0';
-            // cout << names_buf << endl;
 
             // print correct on screen msg indicating the success of receiving usernames from client
             cout << "Main Server received the request from client using TCP over port " << TCP_PORT_M << "." << endl;
@@ -385,22 +392,25 @@ int main(int argc, const char* argv[]){
             vector<int> servers; // store the server each user belongs to (a=0, b=1) 
             validate_client_input(names_buf, invalid_users, valid_users, servers);
 
-            // // TODO: handle the case where all usernames are invalid, or buf is empty or full of empty spaces
-            // // keep requesting for valid usernames until at least one valid username is received
-            // while (valid_users.size() == 0) 
-            // {
-            //     if (send(new_fd, "fail", 14, 0) == -1) 
-            //     {
-            //         perror("client: send");
-            //     }
-            // }
+            // reply to client with a msg indicating validity of client input
 
-            // for usernames that do not exist, reply the client with a msg saying which usernames do not exist
+            // TODO: if all usernames are invalid, buf is empty, or full of empty spaces
+            // reply "fail" and keep requesting for valid usernames until at least one valid username is received
+            if (valid_users.size() == 0) 
+            {
+                if(send(new_fd, "fail", 4, 0) == -1)
+                {
+                    perror("client: send");
+                }
+                continue;
+            }
+
+            // if some users are invalid, reply a msg saying which usernames are invalid
             if (invalid_users.size() > 0) 
             {
                 char invalid_users_buf[USERNAMES_BUF_SIZE];
                 memset(invalid_users_buf, 0, sizeof(invalid_users_buf));
-                vec_to_buf(invalid_users, invalid_users_buf);
+                str_vec_to_buf(invalid_users, invalid_users_buf);
                 if (send(new_fd, invalid_users_buf, strlen(invalid_users_buf), 0) == -1) 
                 {
                     perror("client: send");
@@ -409,9 +419,10 @@ int main(int argc, const char* argv[]){
                 cout << invalid_users_buf << " do not exist. Send a reply to the client." << endl;
 
             }
-            // for those do exist, reply the client with a msg saying all usernames exist
-            else {
-                if (send(new_fd, "none", 4, 0) == -1) 
+
+            else // if all users are valid, reply "pass" to indicate all usernames exist
+            {
+                if (send(new_fd, "pass", 4, 0) == -1) 
                 {
                     perror("client: send");
                 }
@@ -433,100 +444,139 @@ int main(int argc, const char* argv[]){
             }
             
             // forward valid usernames to the corresponding backend server via udp
+            
+            // if there are valid usernames for server A
             char users_a_buf[USERNAMES_BUF_SIZE];
             memset(users_a_buf, 0, sizeof(users_a_buf));
-            vec_to_buf(users_a, users_a_buf);
-            // empty buf is okay for udp
-            if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
-            {
-                perror("serverM udp: sendto");
-                exit(1);
-            }
-            // print correct on screen msg after sending usernames to server A
-            if (numbytes > 0) {
-                cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
-            }
-            // ASK: can i hardcode the server name here?
-
-            char users_b_buf[USERNAMES_BUF_SIZE];
-            memset(users_b_buf, 0, sizeof(users_b_buf));
-            vec_to_buf(users_b, users_b_buf);
-            // empty buf is okay for udp
-            if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
-            {
-                perror("serverM udp: sendto");
-                exit(1);
-            }
-            // print correct on screen msg after sending usernames to server B
-            if (numbytes > 0) 
-            {
-                cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
-            }
-            // ASK: can i hardcode the server name here?
-
-            // receive available time slots from different backend servers via udp
-            // ASK: will the order of receiving be the same as the order of sending?
-
+            str_vec_to_buf(users_a, users_a_buf);
             char times_buf_a[TIME_SLOTS_BUF_SIZE];
             memset(times_buf_a, 0, sizeof(times_buf_a));
             socklen_t addr_len_udp_a;
             addr_len_udp_a = sizeof addr_udp_a;
-            if ((numbytes = recvfrom(sockfd_udp_m, times_buf_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
+            vector<int> times_a;
+            if (users_a.size() > 0) 
             {
-                perror("serverM udp: recvfrom");
-                exit(1);
-            }
-            times_buf_a[numbytes] = '\0';
-            cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
-            cout << "[";
-            vector<int> times_a = buf_to_vec(times_buf_a);
-            if (times_a.size() != 0) {
-                for (int i = 0; i < times_a.size(); i += 2) {
-                    cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
-                    // print "," if not the last element
-                    if (i != times_a.size() - 2) {
-                        cout << ",";
+                // send names managed by server A to server A
+                if ((numbytes = sendto(sockfd_udp_m, users_a_buf, strlen(users_a_buf), 0, (struct sockaddr *) &addr_udp_a, sizeof addr_udp_a)) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+                // print correct on screen msg after sending usernames to server A
+                if (numbytes > 0) {
+                    cout << "Found " << users_a_buf << " located at Server A. Send to Server A." << endl;
+                }
+                // receive timeslots from server A
+                if ((numbytes = recvfrom(sockfd_udp_m, times_buf_a, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
+                {
+                    perror("serverM udp: recvfrom");
+                    exit(1);
+                }
+                times_buf_a[numbytes] = '\0';
+                // print correct on screen msg after receiving timeslots from server A
+                cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
+                cout << "[";
+                times_a = buf_to_int_vec(times_buf_a);
+                if (times_a.size() != 0) 
+                {
+                    for (int i = 0; i < times_a.size(); i += 2) 
+                    {
+                        cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
+                        // print "," if not the last element
+                        if (i != times_a.size() - 2) 
+                        {
+                            cout << ",";
+                        }
                     }
                 }
-            }
-            cout << "]" << endl;
+                cout << "]" << endl;
 
+            }
+
+            // if there are valid usernames for server B
+            char users_b_buf[USERNAMES_BUF_SIZE];
+            memset(users_b_buf, 0, sizeof(users_b_buf));
+            str_vec_to_buf(users_b, users_b_buf);
             char times_buf_b[TIME_SLOTS_BUF_SIZE];
             memset(times_buf_b, 0, sizeof(times_buf_b));
             socklen_t addr_len_udp_b;
             addr_len_udp_b = sizeof addr_udp_b;
-            if ((numbytes = recvfrom(sockfd_udp_m, times_buf_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
+            vector<int> times_b;
+            if (users_b.size() > 0) 
             {
-                perror("serverM udp: recvfrom");
-                exit(1);
+                // send names managed by server B to server B
+                if ((numbytes = sendto(sockfd_udp_m, users_b_buf, strlen(users_b_buf), 0, (struct sockaddr *) &addr_udp_b, sizeof addr_udp_b)) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+                // print correct on screen msg after sending usernames to server B
+                if (numbytes > 0) 
+                {
+                    cout << "Found " << users_b_buf << " located at Server B. Send to Server B." << endl;
+                }
+                // receive timeslots from server B
+                if ((numbytes = recvfrom(sockfd_udp_m, times_buf_b, TIME_SLOTS_BUF_SIZE - 1, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
+                {
+                    perror("serverM udp: recvfrom");
+                    exit(1);
+                }
+                times_buf_b[numbytes] = '\0';
+                // print correct on screen msg after receiving timeslots from server B
+                cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
+                cout << "[";
+                times_b = buf_to_int_vec(times_buf_b);
+                if (times_b.size() != 0) 
+                {
+                    for (int i = 0; i < times_b.size(); i += 2) 
+                    {
+                        cout << "[" << times_b[i] << "," << times_b[i + 1] << "]";
+                        // print "," if not the last element
+                        if (i != times_b.size() - 2) 
+                        {
+                            cout << ",";
+                        }
+                    }
+                }
+                cout << "]" << endl;
             }
-            times_buf_b[numbytes] = '\0';
-            cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
-            cout << "[";
-            vector<int> times_b = buf_to_vec(times_buf_b);
-            if (times_b.size() != 0) {
-                for (int i = 0; i < times_b.size(); i += 2) {
-                    cout << "[" << times_b[i] << "," << times_b[i + 1] << "]";
+        
+            // run an algo to get the final time slots that works for all participants
+            if (users_a.size() == 0) 
+            {
+                times_a.push_back(0);
+                times_a.push_back(100);
+            }
+            if (users_b.size() == 0) 
+            {
+                times_b.push_back(0);
+                times_b.push_back(100);
+            }
+            vector<int> intersects = find_final_time_slots(times_a, times_b);
+
+            // print correct on screen msg after finding the final time slots
+            cout << "Found the intersection between the results from server A and B: [";
+            if (intersects.size() != 0) {
+                for (int i = 0; i < intersects.size(); i += 2) {
+                    cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
                     // print "," if not the last element
-                    if (i != times_b.size() - 2) {
+                    if (i != intersects.size() - 2) {
                         cout << ",";
                     }
                 }
             }
-            cout << "]" << endl;
+            cout << "]." << endl;
 
-            // run an algo to get the final time slots that works for all participants
-            // cout << "Found the intersection between the results from server A and B: <[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
+            // send the result back to the client via tcp
             char intersects_buf[INTERSECTS_BUF_SIZE];
-            find_final_time_slots(times_a, times_b, intersects_buf);
-            
-            // sends the result back to the client via tcp
+            int_vec_to_buf(intersects, intersects_buf);
             if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
             {
                 perror("client: send");
             }
+            
+            // print correct on screen msg after sending the final time slots
             cout << "Main Server sent the result to the client." << endl;
-
 
             close(new_fd);
             exit(0);
