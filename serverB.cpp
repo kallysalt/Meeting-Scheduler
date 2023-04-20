@@ -302,7 +302,12 @@ int main(int argc, const char* argv[])
         perror("serverB talker: sendto");
         exit(1);
     }
-    cout << "Server B finished sending the response to Main Server." << endl;
+
+    // TODO: now is temp solution, need to change
+    if (intersects.size() != 0) 
+    {
+        cout << "Server B finished sending the response to Main Server." << endl;
+    }
 
     // free the linked-list
     freeaddrinfo(servinfo_udp_m); 
