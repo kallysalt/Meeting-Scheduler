@@ -517,8 +517,6 @@ int main(int argc, const char* argv[]){
 
             // run an algo to get the final time slots that works for all participants
             // cout << "Found the intersection between the results from server A and B: <[[t1_start, t1_end], [t2_start, t2_end], ... ]>." << endl;
-            vector<int> times_a = buf_to_vec(times_buf_a);
-            vector<int> times_b = buf_to_vec(times_buf_b);
             char intersects_buf[INTERSECTS_BUF_SIZE];
             find_final_time_slots(times_a, times_b, intersects_buf);
             
