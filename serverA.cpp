@@ -4,7 +4,7 @@
 
 // read input file and store the information in a data structure
 schedules read_input_file(const string &filename) 
-{
+{   
     ifstream f;
     f.open(filename.c_str());
     schedules sched;
@@ -58,25 +58,36 @@ schedules read_input_file(const string &filename)
 }
 
 // convert schedules to a names buffer (names are separated by ', ')
-void schedules_to_buf(schedules scheds, char *buf)
+void schedules_to_names_buf(schedules scheds, char *buf)
 {
     int curr = 0;
     for (schedules::const_iterator it = scheds.begin(); it != scheds.end(); it++)
     {
         string key = it->first;
-        for (int i = curr; i < curr + key.size(); i++) {
+        for (int i = curr; i < curr + key.size(); i++) 
+        {
             buf[i] = key[i - curr];
         }
         buf[curr + key.size()] = ',';
         buf[curr + key.size() + 1] = ' ';
         curr += key.size() + 2;
     }
-    buf[curr - 2] = '\0'; // remove the last ', '
+
+    if (strlen(buf) == 0) // if scheds is empty, do nothing
+    {
+        return;
+    }
+    else // otherwise, remove the last ', '
+    {
+        buf[curr - 2] = '\0'; // remove the last ', '
+    }
 }
 
 // convert a names buffer (names are separated by ', ') to a vector of strings
-vector<string> buf_to_vec(char *buf)
+vector<string> names_buf_to_vec(char *buf)
 {
+    // TODO: what if names buffer is empty
+    
     vector<string> names;
     char *name;
     name = strtok(buf, ", ");
@@ -89,7 +100,7 @@ vector<string> buf_to_vec(char *buf)
 }
 
 // convert a vector of integers to a buffer (integers are separated by ' ')
-void vec_to_buf(vector<int> &vec, char *buf)
+void int_vec_to_buf(vector<int> &vec, char *buf)
 {
     char* curr = buf;
     for (size_t i = 0; i < vec.size(); i++) 
@@ -168,7 +179,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
 
 int main(int argc, const char* argv[])
 {
-    // print boot up msg
+    // print boot up msg ////////////////////////////////////////////////////////////////////////////////////////////
     cout << "Server A is up and running using UDP on port " << UDP_PORT_A << "." << endl; 
 
     // read input file and store the information in a data structure
@@ -232,7 +243,7 @@ int main(int argc, const char* argv[])
     // store all usernames in a char buffer 
     char usernames[USERNAMES_BUF_SIZE];
     memset(usernames, 0, sizeof(usernames));
-    schedules_to_buf(scheds, usernames);
+    schedules_to_names_buf(scheds, usernames);
 
     // send all usernames it has to server M via udp over specified port
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
@@ -243,6 +254,8 @@ int main(int argc, const char* argv[])
 
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
+
+    // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
     // receive users from main server via udp over specified port
     char buf[USERNAMES_BUF_SIZE];
@@ -266,12 +279,12 @@ int main(int argc, const char* argv[])
     // make a copy of buf before calling strtok
     char names_buf[USERNAMES_BUF_SIZE];
     strcpy(names_buf, buf);
-    vector<string> names = buf_to_vec(buf);
+    vector<string> names = names_buf_to_vec(buf);
 
     // find the time intersection among them
     vector<int> intersects = find_intersection(names, scheds);
     char intersects_buf[INTERSECTS_BUF_SIZE];
-    vec_to_buf(intersects, intersects_buf);
+    int_vec_to_buf(intersects, intersects_buf);
 
     // format and print the result
     if (names.size() != 0) 
