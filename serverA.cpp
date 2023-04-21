@@ -273,6 +273,7 @@ int main(int argc, const char* argv[])
             exit(1);
         }
         buf[numbytes] = '\0';
+        cout << "dbg: received active users buf is " << buf << endl;
 
         // print correct on screen msg indicating the success of receiving usernames from the main server
         cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
@@ -316,6 +317,7 @@ int main(int argc, const char* argv[])
             perror("serverA talker: sendto");
             exit(1);
         }
+        cout << "dbg: intersects_buf is " << intersects_buf << endl;
 
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
