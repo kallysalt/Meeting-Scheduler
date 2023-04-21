@@ -163,7 +163,6 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         valid_buf[numbytes] = '\0';
-        cout << valid_buf << endl;
 
         // print on screen msg after receiving availability of all users in the meeting from the main server
         vector<string> intersects = buf_to_string_vec(intersects_buf);

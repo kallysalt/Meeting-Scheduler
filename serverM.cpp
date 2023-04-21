@@ -412,7 +412,6 @@ int main(int argc, const char* argv[]){
             }
             // print correct on screen msg after sending invalid usernames to client
             cout << invalid_users_buf << " do not exist. Send a reply to the client." << endl;
-
         }
 
         else // if all users are valid, reply "pass" to indicate all usernames exist
@@ -580,9 +579,6 @@ int main(int argc, const char* argv[]){
         {
             perror("client: send");
         }
-
-        close(new_fd);
-        exit(0);
     }
 
     close(sockfd_udp_m);
