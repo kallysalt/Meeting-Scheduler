@@ -126,7 +126,7 @@ int main(int argc, const char* argv[]){
         if (strcmp(invalid_buf, "fail") == 0) 
         {
             // TODO: print some error msg?
-            cout << "invalid buf is fail" << endl;
+            // cout << "invalid buf is fail" << endl;
             continue;
         }
 

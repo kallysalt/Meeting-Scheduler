@@ -256,6 +256,7 @@ int main(int argc, const char* argv[])
 
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
+    memset(usernames, 0, sizeof(usernames));
 
     // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -267,13 +268,13 @@ int main(int argc, const char* argv[])
         struct sockaddr_storage their_addr;
         socklen_t addr_len;
         addr_len = sizeof their_addr;
-        int numbytes;
+        int numbytes = 0;
         if ((numbytes = recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
             perror("serverA talker: recvfrom");
             exit(1);
         }
         buf[numbytes] = '\0';
-        cout << "dbg: received active users buf is " << buf << endl;
+        // cout << "dbg: received active users buf is " << buf << endl;
 
         // print correct on screen msg indicating the success of receiving usernames from the main server
         cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
@@ -283,6 +284,7 @@ int main(int argc, const char* argv[])
         char names_buf[USERNAMES_BUF_SIZE];
         strcpy(names_buf, buf);
         vector<string> names = names_buf_to_vec(buf);
+        memset(buf, 0, sizeof(buf));
 
         // find the time intersection among them
         vector<int> intersects = find_intersection(names, scheds);
@@ -310,6 +312,7 @@ int main(int argc, const char* argv[])
             }
             cout << "] for " << names_buf << "." << endl;
         }
+        memset(names_buf, 0, sizeof(names_buf));
 
         // send the result back to the main server (from beej's guide)
         if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
@@ -321,6 +324,7 @@ int main(int argc, const char* argv[])
 
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
+        memset(intersects_buf, 0, sizeof(intersects_buf));
     }
 
     // free the linked-list (from beej's guide)
