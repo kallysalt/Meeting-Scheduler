@@ -19,7 +19,6 @@
 #include <sstream>
 #include <set>
 #include <signal.h>
-#include <limits.h>
 
 using namespace std;
 

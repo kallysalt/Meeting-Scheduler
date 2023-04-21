@@ -99,8 +99,7 @@ int main(int argc, const char* argv[]){
         // show a prompt: Please enter the usernames to check schedule availability:
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
 
         // send these names to the main server over tcp (from beej's guide)
         if (send(sockfd, input.c_str(), input.length(), 0) == -1)
