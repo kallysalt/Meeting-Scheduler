@@ -143,6 +143,7 @@ vector<int> find_final_time_slots(vector<int> &times_a, vector<int> &times_b)
     // if any of the users has no time slots, return immediately
     if (times_a.size() == 0 || times_b.size() == 0) 
     {
+        cout << "dbg: times_a.size() == 0 || times_b.size() == 0" << endl;
         return final_times;
     }
     // otherwise, find intersection of time slots
@@ -555,16 +556,23 @@ int main(int argc, const char* argv[]){
                     cout << ",";
                 }
             }
+            cout << "]." << endl;
+            
+            // send the result back to the client via tcp (from beej's guide)
+            char intersects_buf[INTERSECTS_BUF_SIZE];
+            memset(intersects_buf, 0, sizeof(intersects_buf));
+            int_vec_to_buf(intersects, intersects_buf);
+            if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
+            {
+                perror("client: send");
+            }
         }
-        cout << "]." << endl;
-
-        // send the result back to the client via tcp (from beej's guide)
-        char intersects_buf[INTERSECTS_BUF_SIZE];
-        memset(intersects_buf, 0, sizeof(intersects_buf));
-        int_vec_to_buf(intersects, intersects_buf);
-        if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
-        {
-            perror("client: send");
+        else {
+            // send the result back to the client via tcp (from beej's guide)
+            if (send(new_fd, "]", 1, 0) == -1) 
+            {
+                perror("client: send");
+            }
         }
         
         // print correct on screen msg after sending the final time slots

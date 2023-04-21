@@ -163,21 +163,27 @@ int main(int argc, const char* argv[]){
         // cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // print on screen msg after receiving availability of all users in the meeting from the main server
-        vector<string> intersects = buf_to_string_vec(intersects_buf);
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
         // cout << "dbg: intersects.size() is " << intersects.size() << endl;
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
-        if (intersects.size() != 0) {
-            for (int i = 0; i < intersects.size(); i += 2) {
+        if (numbytes > 1) {
+            vector<string> intersects = buf_to_string_vec(intersects_buf);
+            for (int i = 0; i < intersects.size(); i += 2) 
+            {
                 cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
                 // print "," if not the last element
                 if (i != intersects.size() - 2) {
                     cout << ",";
                 }
             }
+            cout << "]";
         }
-        // printxw valid names
+        else {
+            cout << intersects_buf;
+        }
+        
+        // print valid names
         cout << "]" << " works for " << "<temp>" << "." << endl;
 
         // start a new request 
