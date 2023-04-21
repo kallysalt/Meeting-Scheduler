@@ -349,21 +349,21 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
 
+    int new_fd; // new connection on new_fd
+    struct sockaddr_storage their_addr_tcp; // connector's address information
+    sin_size = sizeof their_addr_tcp;
+    new_fd = accept(sockfd_tcp_m, (struct sockaddr *) &their_addr_tcp, &sin_size);
+    if (new_fd == -1) 
+    {
+        perror("accept");
+        // continue;
+    }
+
+    // set up finishes ///////////////////////////////////////////////////////////////////////////////////////////
+
     while (1) // main accept loop (from beej's guide)
     {  
         cout << "dbg: main Server is ready for next iteration." << endl;
-        
-        int new_fd; // new connection on new_fd
-        struct sockaddr_storage their_addr_tcp; // connector's address information
-        sin_size = sizeof their_addr_tcp;
-        new_fd = accept(sockfd_tcp_m, (struct sockaddr *) &their_addr_tcp, &sin_size);
-        if (new_fd == -1) 
-        {
-            perror("accept");
-            // continue;
-        }
-
-        // set up finishes /////////////////////////////////////////////////////////////////////////////////////
 
         // receive names sent from client via tcp (from beej's guide) (todo: make sure prepared)
         char names_buf[USERNAMES_BUF_SIZE];
