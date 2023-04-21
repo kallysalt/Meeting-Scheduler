@@ -107,8 +107,8 @@ int main(int argc, const char* argv[]){
             perror("client: send");
             exit(1);
         }
-        cout << "dbg: input is " << input.c_str() << endl;
-        cout << "dbg: sent input to main" << endl;
+        // cout << "dbg: input is " << input.c_str() << endl;
+        // cout << "dbg: sent input to main" << endl;
 
         // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
@@ -119,8 +119,8 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         invalid_buf[numbytes] = '\0';
-        cout << "dbg: invalid_buf is " << invalid_buf << endl;
-        cout << "dbg: recvd invalid buf from main" << endl;
+        // cout << "dbg: invalid_buf is " << invalid_buf << endl;
+        // cout << "dbg: recvd invalid buf from main" << endl;
 
         // TODO: if none of the usernames is valid, stop this iteration to request for another client input
         if (strcmp(invalid_buf, "fail") == 0) 
@@ -164,8 +164,8 @@ int main(int argc, const char* argv[]){
         vector<string> intersects = buf_to_string_vec(intersects_buf);
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
-        cout << "dbg: intersects.size() is " << intersects.size() << endl;
-        cout << "dbg: intersects_buf is " << intersects_buf << endl;
+        // cout << "dbg: intersects.size() is " << intersects.size() << endl;
+        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         if (intersects.size() != 0) {
             for (int i = 0; i < intersects.size(); i += 2) {
                 cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
