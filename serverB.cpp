@@ -288,16 +288,16 @@ int main(int argc, const char* argv[])
         // find the time intersection among them
         vector<int> intersects = find_intersection(names, scheds);
 
-        // TODO: handle the case when one of the user's sched is empty
-        if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
-            intersects.clear();
-        }
+        // // TODO: handle the case when one of the user's sched is empty
+        // if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
+        //     intersects.clear();
+        // }
 
         // format and print the result
         char intersects_buf[INTERSECTS_BUF_SIZE];
         int_vec_to_buf(intersects, intersects_buf);
-        if (names.size() != 0) 
-        {
+        // if (names.size() != 0) 
+        // {
             cout << "Found the intersection result: ";
             cout << "[";    
 
@@ -310,7 +310,7 @@ int main(int argc, const char* argv[])
                 }
             }
             cout << "] for " << names_buf << "." << endl;
-        }
+        // }
 
         // send the result back to the main server (from beej's guide)
         if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
