@@ -151,14 +151,14 @@ int main(int argc, const char* argv[]){
         cout << "dbg: intersects_buf is " << intersects_buf << endl;
 
         // TODO: receive valid users buf from the main server over tcp (from beej's guide)
-        char valid_buf[USERNAMES_BUF_SIZE];
-        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-        {
-            perror("client: recv");
-            exit(1);
-        }
-        valid_buf[numbytes] = '\0';
-        cout << "dbg: valid_buf is " << valid_buf << endl;
+        // char valid_buf[USERNAMES_BUF_SIZE];
+        // if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        // {
+        //     perror("client: recv");
+        //     exit(1);
+        // }
+        // valid_buf[numbytes] = '\0';
+        // cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // print on screen msg after receiving availability of all users in the meeting from the main server
         vector<string> intersects = buf_to_string_vec(intersects_buf);
@@ -176,7 +176,7 @@ int main(int argc, const char* argv[]){
             }
         }
         // printxw valid names
-        cout << "]" << " works for " << valid_buf << "." << endl;
+        cout << "]" << " works for " << "<temp>" << "." << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;
