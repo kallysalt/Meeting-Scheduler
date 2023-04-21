@@ -349,19 +349,19 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
 
+    int new_fd; // new connection on new_fd
+    struct sockaddr_storage their_addr_tcp; // connector's address information
+    sin_size = sizeof their_addr_tcp;
+    new_fd = accept(sockfd_tcp_m, (struct sockaddr *) &their_addr_tcp, &sin_size);
+    if (new_fd == -1) 
+    {
+        perror("accept");
+        // continue;
+    }
+
     while (1) // main accept loop (from beej's guide)
     {  
-        int new_fd; // new connection on new_fd
-        struct sockaddr_storage their_addr_tcp; // connector's address information
-        sin_size = sizeof their_addr_tcp;
-        new_fd = accept(sockfd_tcp_m, (struct sockaddr *) &their_addr_tcp, &sin_size);
-        if (new_fd == -1) 
-        {
-            perror("accept");
-            continue;
-        }
-
-        if (!fork()) // this is the child process (from beej's guide)
+        if (!fork()) // this is the child process (from beej's guide) (may not be necessary)
         { 
             close(sockfd_tcp_m); // child doesn't need the listener
             if (send(new_fd, "start client!", 13, 0) == -1) 
@@ -371,9 +371,7 @@ int main(int argc, const char* argv[]){
 
             // set up finishes /////////////////////////////////////////////////////////////////////////////////////
 
-            // TODO: another while loop?
-
-            // receive names sent from client via tcp (from beej's guide)
+            // receive names sent from client via tcp (from beej's guide) (todo: make sure program is ready)
             char names_buf[USERNAMES_BUF_SIZE];
             memset(names_buf, 0, sizeof(names_buf));
             if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 

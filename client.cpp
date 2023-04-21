@@ -140,6 +140,7 @@ int main(int argc, const char* argv[]){
         }
 
         // if some of the usernames do not exist, print: <username1, username2, ...> do not exist
+        // todo
         if (strcmp(invalid_buf, "pass") != 0) {
             cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
             cout << invalid_buf << " do not exist." << endl;
