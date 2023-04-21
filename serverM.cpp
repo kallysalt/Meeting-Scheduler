@@ -351,6 +351,8 @@ int main(int argc, const char* argv[]){
 
     while (1) // main accept loop (from beej's guide)
     {  
+        cout << "dbg: main Server is ready for next iteration." << endl;
+        
         int new_fd; // new connection on new_fd
         struct sockaddr_storage their_addr_tcp; // connector's address information
         sin_size = sizeof their_addr_tcp;
@@ -393,11 +395,10 @@ int main(int argc, const char* argv[]){
                 perror("client: send");
             }
             continue;
+            cout << "dbg: continue does't work " << endl;
         }
-        cout << "dbg: proceed with current iteration " << endl;
-
         // if some users are invalid, reply a msg to client saying which usernames are invalid
-        if (invalid_users.size() > 0) 
+        else if (invalid_users.size() > 0) 
         {
             char invalid_users_buf[USERNAMES_BUF_SIZE];
             memset(invalid_users_buf, 0, sizeof(invalid_users_buf));
@@ -409,7 +410,6 @@ int main(int argc, const char* argv[]){
             // print correct on screen msg after sending invalid usernames to client
             cout << invalid_users_buf << " do not exist. Send a reply to the client." << endl;
         }
-
         else // if all users are valid, reply "pass" to indicate all usernames exist
         {
             if (send(new_fd, "pass", 4, 0) == -1) 
@@ -444,6 +444,7 @@ int main(int argc, const char* argv[]){
         socklen_t addr_len_udp_a;
         addr_len_udp_a = sizeof addr_udp_a;
         vector<int> times_a;
+
         if (users_a.size() > 0) 
         {
             // send names managed by server A to server A (from beej's guide)
@@ -480,7 +481,6 @@ int main(int argc, const char* argv[]){
                 }
             }
             cout << "]" << endl;
-
         }
 
         // if there are valid usernames for server B
@@ -492,6 +492,7 @@ int main(int argc, const char* argv[]){
         socklen_t addr_len_udp_b;
         addr_len_udp_b = sizeof addr_udp_b;
         vector<int> times_b;
+
         if (users_b.size() > 0) 
         {
             // send names managed by server B to server B (from beej's guide)
@@ -566,6 +567,7 @@ int main(int argc, const char* argv[]){
         }
         
         // print correct on screen msg after sending the final time slots
+        cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
 
         // TODO: send valid usernames to client (from beej's guide)
@@ -575,6 +577,7 @@ int main(int argc, const char* argv[]){
         {
             perror("client: send");
         }
+        cout << "dbg: valid_users_buf is " << valid_users_buf << endl;
 
         close(new_fd);
     }
