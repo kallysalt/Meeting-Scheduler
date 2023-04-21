@@ -578,10 +578,9 @@ int main(int argc, const char* argv[]){
             perror("client: send");
         }
         cout << "dbg: valid_users_buf is " << valid_users_buf << endl;
-
-        close(new_fd);
     }
 
+    close(new_fd);
     close(sockfd_udp_m);
     return 0;
 }
