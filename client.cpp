@@ -150,7 +150,7 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         intersects_buf[numbytes] = '\0';
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
+        cout << "dbg: intersects_buf is " << intersects_buf << endl;
 
         // TODO: receive valid users buf from the main server over tcp (from beej's guide)
         // char valid_buf[USERNAMES_BUF_SIZE];
@@ -182,9 +182,9 @@ int main(int argc, const char* argv[]){
         else {
             cout << intersects_buf;
         }
-        
+
         // print valid names
-        cout << "]" << " works for " << "<temp>" << "." << endl;
+        cout << " works for " << "<temp>" << "." << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;
