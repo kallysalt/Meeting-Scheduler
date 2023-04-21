@@ -388,9 +388,9 @@ int main(int argc, const char* argv[]){
         validate_client_input(names_buf, invalid_users, valid_users, servers);
 
         // reply to client with a msg indicating validity of client input
-
         // TODO: if all usernames are invalid, buf is empty, or full of empty spaces
-        // reply "fail" and keep requesting for valid usernames until at least one valid username is received
+
+        // reply "fail" to client and keep requesting for valid usernames until at least one of them is valid
         if (valid_users.size() == 0) 
         {
             if(send(new_fd, "fail", 4, 0) == -1)
@@ -399,8 +399,9 @@ int main(int argc, const char* argv[]){
             }
             continue;
         }
+        cout << "dbg: proceed with current iteration " << endl;
 
-        // if some users are invalid, reply a msg saying which usernames are invalid
+        // if some users are invalid, reply a msg to client saying which usernames are invalid
         if (invalid_users.size() > 0) 
         {
             char invalid_users_buf[USERNAMES_BUF_SIZE];
@@ -579,6 +580,8 @@ int main(int argc, const char* argv[]){
         {
             perror("client: send");
         }
+
+        close(new_fd);
     }
 
     close(sockfd_udp_m);

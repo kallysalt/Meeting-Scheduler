@@ -32,8 +32,10 @@ vector<string> buf_to_string_vec(char *buf)
 
 int main(int argc, const char* argv[]){
 
-    // get server M's tcp port's address information ////////////////////////////////////////////////////////////////
-    // (from beej's guide)
+    // print boot up msg ( after servers are booted up backedn servers sent usernames to the main server?) //////////
+    cout << "Client is up and running." << endl;
+    
+    // get server M's tcp port's address information (from beej's guide)
     struct addrinfo hints, *servinfo, *p;
     int rv;
     memset(&hints, 0, sizeof hints);
@@ -87,21 +89,6 @@ int main(int argc, const char* argv[]){
     // all done with this structure (from beej's guide)
     freeaddrinfo(servinfo); 
 
-    // TODO: receive 'ok' from the main server? (from beej's guide)
-    char buf[20];
-    int numbytes;
-    if ((numbytes = recv(sockfd, buf, 19, 0)) == -1)
-    {
-        perror("client: recv");
-        exit(1);
-    }
-    buf[numbytes] = '\0';
-
-    // after servers are booted up and required usernames are transferred 
-    // from backend servers to the main server, the client will be started
-    // print boot up msg
-    cout << "Client is up and running." << endl;
-
     // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
     // wait for the usernames to be taken as inputs from the user (from beej's guide)
@@ -119,9 +106,11 @@ int main(int argc, const char* argv[]){
             perror("client: send");
             exit(1);
         }
+        cout << "dbg: input is " << input << endl;
 
         // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
+        int numbytes;
         if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
             perror("client: recv");
