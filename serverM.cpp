@@ -360,11 +360,6 @@ int main(int argc, const char* argv[]){
             perror("accept");
             // continue;
         }
-    
-        if (send(new_fd, "start client!", 13, 0) == -1) 
-        {
-            perror("client: send");
-        }
 
         // set up finishes /////////////////////////////////////////////////////////////////////////////////////
 
