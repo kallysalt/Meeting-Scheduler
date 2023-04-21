@@ -363,7 +363,7 @@ int main(int argc, const char* argv[]){
 
     while (1) // main accept loop (from beej's guide)
     {  
-        cout << "dbg: main Server is ready for next iteration." << endl;
+        // cout << "dbg: main Server is ready for next iteration." << endl;
 
         // receive names sent from client via tcp (from beej's guide) (todo: make sure prepared)
         char names_buf[USERNAMES_BUF_SIZE];
@@ -395,7 +395,7 @@ int main(int argc, const char* argv[]){
                 perror("client: send");
             }
             continue;
-            cout << "dbg: continue does't work " << endl;
+            // cout << "dbg: continue does't work " << endl;
         }
         // if some users are invalid, reply a msg to client saying which usernames are invalid
         else if (invalid_users.size() > 0) 
@@ -567,7 +567,7 @@ int main(int argc, const char* argv[]){
         }
         
         // print correct on screen msg after sending the final time slots
-        cout << "dbg: intersects_buf is " << intersects_buf << endl;
+        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
 
         // TODO: send valid usernames to client (from beej's guide)
