@@ -256,7 +256,6 @@ int main(int argc, const char* argv[])
 
     // print correct on screen msg indicating the success of sending usernames to server M
     cout << "Server A finished sending a list of usernames to Main Server." << endl;
-    memset(usernames, 0, sizeof(usernames));
 
     // set up finishes //////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -282,9 +281,9 @@ int main(int argc, const char* argv[])
         // search in database to get all requested users' availability
         // make a copy of buf before calling strtok
         char names_buf[USERNAMES_BUF_SIZE];
+        memset(names_buf, 0, sizeof(names_buf));
         strcpy(names_buf, buf);
         vector<string> names = names_buf_to_vec(buf);
-        memset(buf, 0, sizeof(buf));
 
         // find the time intersection among them
         vector<int> intersects = find_intersection(names, scheds);
@@ -296,6 +295,7 @@ int main(int argc, const char* argv[])
 
         // format and print the result
         char intersects_buf[INTERSECTS_BUF_SIZE];
+        memset(intersects_buf, 0, sizeof(intersects_buf));
         int_vec_to_buf(intersects, intersects_buf);
         if (names.size() != 0) 
         {
@@ -312,7 +312,6 @@ int main(int argc, const char* argv[])
             }
             cout << "] for " << names_buf << "." << endl;
         }
-        memset(names_buf, 0, sizeof(names_buf));
 
         // send the result back to the main server (from beej's guide)
         if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
@@ -324,7 +323,6 @@ int main(int argc, const char* argv[])
 
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
-        memset(intersects_buf, 0, sizeof(intersects_buf));
     }
 
     // free the linked-list (from beej's guide)

@@ -560,6 +560,7 @@ int main(int argc, const char* argv[]){
 
         // send the result back to the client via tcp (from beej's guide)
         char intersects_buf[INTERSECTS_BUF_SIZE];
+        memset(intersects_buf, 0, sizeof(intersects_buf));
         int_vec_to_buf(intersects, intersects_buf);
         if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
         {

@@ -112,6 +112,7 @@ int main(int argc, const char* argv[]){
 
         // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
+        memset(invalid_buf, 0, sizeof(invalid_buf));
         int numbytes;
         if ((numbytes = recv(sockfd, invalid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
@@ -142,6 +143,7 @@ int main(int argc, const char* argv[]){
 
         // wait for time availability of all users in the meeting from the main server over tcp (from beej's guide)
         char intersects_buf[INTERSECTS_BUF_SIZE];
+        memset(intersects_buf, 0, sizeof(intersects_buf));
         if ((numbytes = recv(sockfd, intersects_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
         {
             perror("client: recv");
