@@ -160,6 +160,7 @@ int main(int argc, const char* argv[]){
         vector<string> intersects = buf_to_string_vec(intersects_buf);
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
+        cout << "dbg: intersects.size() is " << intersects.size() << endl;
         if (intersects.size() != 0) {
             for (int i = 0; i < intersects.size(); i += 2) {
                 cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
