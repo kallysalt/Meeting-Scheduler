@@ -99,7 +99,6 @@ int main(int argc, const char* argv[]){
         // show a prompt: Please enter the usernames to check schedule availability:
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
-        cin.ignore();
 
         // send these names to the main server over tcp (from beej's guide)
         if (send(sockfd, input.c_str(), input.length(), 0) == -1)
@@ -107,7 +106,8 @@ int main(int argc, const char* argv[]){
             perror("client: send");
             exit(1);
         }
-        cout << "dbg: input is " << input << endl;
+        cout << "dbg: input is " << input.c_str() << endl;
+        cout << "dbg: sent input to main" << endl;
 
         // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
@@ -119,11 +119,13 @@ int main(int argc, const char* argv[]){
         }
         invalid_buf[numbytes] = '\0';
         cout << "dbg: invalid_buf is " << invalid_buf << endl;
+        cout << "dbg: recvd invalid buf from main" << endl;
 
         // TODO: if none of the usernames is valid, stop this iteration to request for another client input
         if (strcmp(invalid_buf, "fail") == 0) 
         {
             // TODO: print some error msg?
+            cout << "invalid buf is fail" << endl;
             continue;
         }
 
