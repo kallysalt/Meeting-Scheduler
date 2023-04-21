@@ -320,7 +320,7 @@ int main(int argc, const char* argv[])
             perror("serverA talker: sendto");
             exit(1);
         }
-        cout << "dbg: intersects_buf is " << intersects_buf << endl;
+        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
 
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
