@@ -145,6 +145,15 @@ int main(int argc, const char* argv[]){
         }
         intersects_buf[numbytes] = '\0';
 
+        // TODO: receive valid users buf from the main server over tcp (from beej's guide)
+        char valid_buf[USERNAMES_BUF_SIZE];
+        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+        valid_buf[numbytes] = '\0';
+
         // print on screen msg after receiving availability of all users in the meeting from the main server
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
@@ -164,16 +173,7 @@ int main(int argc, const char* argv[]){
 
         // print valid names
         cout << " works for " << "<temp>" << "." << endl;
-
-        // TODO: receive valid users buf from the main server over tcp (from beej's guide)
-        char valid_buf[USERNAMES_BUF_SIZE];
-        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-        {
-            perror("client: recv");
-            exit(1);
-        }
-        valid_buf[numbytes] = '\0';
-        // cout << "dbg: valid_buf is " << valid_buf << endl;
+        cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;
