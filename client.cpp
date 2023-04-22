@@ -188,7 +188,7 @@ int main(int argc, const char* argv[]){
         cout << " works for ";
         for (int i = 0; i < input_names.size(); i++) 
         {
-            if (invalid_names.find(input_names[i]) != invalid_names.end()) 
+            if (invalid_names.find(input_names[i]) == invalid_names.end()) 
             {
                 cout << input_names[i];
                 // print "," if not the last element
