@@ -167,7 +167,8 @@ int main(int argc, const char* argv[]){
         cout << "Time intervals [";
         // cout << "dbg: intersects.size() is " << intersects.size() << endl;
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
-        if (numbytes > 1) {
+        if (strcmp(intersects_buf, "empty") != 0) 
+        {
             vector<string> intersects = buf_to_string_vec(intersects_buf);
             for (int i = 0; i < intersects.size(); i += 2) 
             {
@@ -177,11 +178,8 @@ int main(int argc, const char* argv[]){
                     cout << ",";
                 }
             }
-            cout << "]";
         }
-        else {
-            cout << intersects_buf;
-        }
+        cout << "]";
 
         // print valid names
         cout << " works for " << "<temp>" << "." << endl;
