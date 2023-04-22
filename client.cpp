@@ -193,6 +193,7 @@ int main(int argc, const char* argv[]){
                 cout << input_names[i];
                 // print "," if not the last element
                 if (i != num_valid_names - 1) {
+                    cout << "i = " << i << ", num_valid_names = " << num_valid_names << endl;
                     cout << ",";
                 }
             }
