@@ -605,7 +605,7 @@ int main(int argc, const char* argv[]){
         if (send(new_fd, valid_users_buf, strlen(valid_users_buf), 0) == -1) 
         {
             perror("client: send");
-        
+        }
         cout << "dbg: valid_users_buf is " << valid_users_buf << endl;
     }
 
