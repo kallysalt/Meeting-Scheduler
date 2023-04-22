@@ -143,7 +143,7 @@ vector<int> find_final_time_slots(vector<int> &times_a, vector<int> &times_b)
     // if any of the users has no time slots, return immediately
     if (times_a.size() == 0 || times_b.size() == 0) 
     {
-        cout << "dbg: times_a.size() == 0 || times_b.size() == 0" << endl;
+        // cout << "dbg: times_a.size() == 0 || times_b.size() == 0" << endl;
         return final_times;
     }
     // otherwise, find intersection of time slots
@@ -464,7 +464,7 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_a[numbytes] = '\0';
-            cout << "dbg: times buf a: " << times_buf_a << endl;
+            // cout << "dbg: times buf a: " << times_buf_a << endl;
 
             // print correct on screen msg after receiving timeslots from server A
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
@@ -518,7 +518,7 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_b[numbytes] = '\0';
-            cout << "dbg: times buf b: " << times_buf_b << endl;
+            // cout << "dbg: times buf b: " << times_buf_b << endl;
             // print correct on screen msg after receiving timeslots from server B
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
@@ -554,11 +554,11 @@ int main(int argc, const char* argv[]){
         else {
             intersects = find_final_time_slots(times_a, times_b);
         }
-        cout << "dbg: intersects: ";
-        for (int i = 0; i < intersects.size(); i++) {
-            cout << intersects[i] << " ";
-        }
-        cout << "." << endl;
+        // cout << "dbg: intersects: ";
+        // for (int i = 0; i < intersects.size(); i++) {
+        //     cout << intersects[i] << " ";
+        // }
+        // cout << "." << endl;
 
         // print correct on screen msg after finding the final time slots
         cout << "Found the intersection between the results from server A and B: [";
