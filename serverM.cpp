@@ -469,17 +469,19 @@ int main(int argc, const char* argv[]){
             // print correct on screen msg after receiving timeslots from server A
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
-            times_a = buf_to_int_vec(times_buf_a);
-            memset(times_buf_a, 0, sizeof(times_buf_a));
-            if (times_a.size() != 0) 
-            {
-                for (int i = 0; i < times_a.size(); i += 2) 
+            if (strcmp(times_buf_a, "empty") != 0) {
+                times_a = buf_to_int_vec(times_buf_a);
+                memset(times_buf_a, 0, sizeof(times_buf_a));
+                if (times_a.size() != 0) 
                 {
-                    cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
-                    // print "," if not the last element
-                    if (i != times_a.size() - 2) 
+                    for (int i = 0; i < times_a.size(); i += 2) 
                     {
-                        cout << ",";
+                        cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
+                        // print "," if not the last element
+                        if (i != times_a.size() - 2) 
+                        {
+                            cout << ",";
+                        }
                     }
                 }
             }
@@ -520,20 +522,22 @@ int main(int argc, const char* argv[]){
             // print correct on screen msg after receiving timeslots from server B
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
-            times_b = buf_to_int_vec(times_buf_b);
-            memset(times_buf_b, 0, sizeof(times_buf_b));
-            if (times_b.size() != 0) 
-            {
-                for (int i = 0; i < times_b.size(); i += 2) 
+            if (strcmp(times_buf_b, "empty") != 0) {
+                times_b = buf_to_int_vec(times_buf_b);
+                memset(times_buf_b, 0, sizeof(times_buf_b));
+                if (times_b.size() != 0) 
                 {
-                    cout << "[" << times_b[i] << "," << times_b[i + 1] << "]";
-                    // print "," if not the last element
-                    if (i != times_b.size() - 2) 
+                    for (int i = 0; i < times_b.size(); i += 2) 
                     {
-                        cout << ",";
+                        cout << "[" << times_b[i] << "," << times_b[i + 1] << "]";
+                        // print "," if not the last element
+                        if (i != times_b.size() - 2) 
+                        {
+                            cout << ",";
+                        }
                     }
                 }
-            }
+        }
             cout << "]" << endl;
         }
     
@@ -550,7 +554,7 @@ int main(int argc, const char* argv[]){
         else {
             intersects = find_final_time_slots(times_a, times_b);
         }
-        cout < "dbg: intersects: ";
+        cout << "dbg: intersects: ";
         for (int i = 0; i < intersects.size(); i++) {
             cout << intersects[i] << " ";
         }
