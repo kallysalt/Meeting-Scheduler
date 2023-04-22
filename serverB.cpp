@@ -39,7 +39,7 @@ schedules read_input_file(const string &filename)
             bracket_idx.erase(bracket_idx.end() - 1);
             // handle extreme case (empty schedule [])
             if (bracket_idx.size() == 0) {
-                pair<int, int> place_holder;
+                pair<int, int> place_holder; // [0, 0]
                 scheds[username].push_back(place_holder);
                 continue;
             }
@@ -126,21 +126,21 @@ void int_vec_to_buf(vector<int> &vec, char *buf)
 // identify the time slots that are available for all the requested users
 vector<int> find_intersection(vector<string> names, schedules &scheds) 
 {
-    // when there is no user
-    if (names.size() == 0) 
-    {
-        return vector<int>();
-    }
-    
-    // when there is at least one user, initialize the intersects vector
+    // initialize the intersects vector with the first user's availability
     vector<int> intersects;
     string name = names[0];
     schedule sched = scheds[name];
-
     for (int k = 0; k < sched.size(); k++) 
     {
         intersects.push_back(sched[k].first);
         intersects.push_back(sched[k].second);
+    }
+
+    // if the first user has no availability, return an empty vector
+    if (intersects[0] == 0 && intersects[1] == 0) 
+    {
+        intersects.clear();
+        return intersects;
     }
 
     // when there is only one user, return immediately
@@ -164,6 +164,13 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
             for (int k = 0; k < sched.size(); k++) {
                 int y_start = sched[k].first;
                 int y_end = sched[k].second;
+
+                // if this user has no availability, return an empty vector
+                if (y_start == 0 && y_end == 0) 
+                {
+                    intersects.clear();
+                    return intersects;
+                }
 
                 // check if there is an intersection
                 if ((x_end > y_start && x_start < y_end) || (y_end > x_start && y_start < x_end))
@@ -288,11 +295,6 @@ int main(int argc, const char* argv[])
         // find the time intersection among them
         vector<int> intersects = find_intersection(names, scheds);
         cout << "dbg: intersects size is " << intersects.size() << endl;
-
-        // // TODO: handle the case when one of the user's sched is empty
-        // if (intersects.size() == 2 && intersects[0] == 0 && intersects[1] == 0) {
-        //     intersects.clear();
-        // }
 
         // format and print the result
         char intersects_buf[INTERSECTS_BUF_SIZE];
