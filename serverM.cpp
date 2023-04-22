@@ -606,7 +606,6 @@ int main(int argc, const char* argv[]){
         {
             perror("client: send");
         }
-        cout << "dbg: valid_users_buf is " << valid_users_buf << endl;
     }
 
     return 0;

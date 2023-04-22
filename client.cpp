@@ -173,7 +173,7 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         valid_buf[numbytes] = '\0';
-        cout << "dbg: valid_buf is " << valid_buf << endl;
+        // cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;
