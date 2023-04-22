@@ -316,10 +316,20 @@ int main(int argc, const char* argv[])
         // }
 
         // send the result back to the main server (from beej's guide)
-        if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+        if (strlen(intersects_buf) == 0) 
         {
-            perror("serverB talker: sendto");
-            exit(1);
+            if ((sendto(sockfd, "-1 -1", 5, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+            {
+                perror("serverB talker: sendto");
+                exit(1);
+            }
+        }
+        else {
+            if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+            {
+                perror("serverB talker: sendto");
+                exit(1);
+            }
         }
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
 
