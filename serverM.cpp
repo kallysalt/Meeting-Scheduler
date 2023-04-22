@@ -465,27 +465,6 @@ int main(int argc, const char* argv[]){
             }
             times_buf_a[numbytes] = '\0';
             // cout << "dbg: times buf a: " << times_buf_a << endl;
-
-            // print correct on screen msg after receiving timeslots from server A
-            cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
-            cout << "[";
-            if (strcmp(times_buf_a, "empty") != 0) {
-                times_a = buf_to_int_vec(times_buf_a);
-                memset(times_buf_a, 0, sizeof(times_buf_a));
-                if (times_a.size() != 0) 
-                {
-                    for (int i = 0; i < times_a.size(); i += 2) 
-                    {
-                        cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
-                        // print "," if not the last element
-                        if (i != times_a.size() - 2) 
-                        {
-                            cout << ",";
-                        }
-                    }
-                }
-            }
-            cout << "]." << endl;
         }
 
         // if there are valid usernames for server B
@@ -519,7 +498,33 @@ int main(int argc, const char* argv[]){
             }
             times_buf_b[numbytes] = '\0';
             // cout << "dbg: times buf b: " << times_buf_b << endl;
-            // print correct on screen msg after receiving timeslots from server B
+        }
+
+        // print correct on screen msg after receiving timeslots from server A
+        if (users_a.size() > 0) {
+            cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
+            cout << "[";
+            if (strcmp(times_buf_a, "empty") != 0) {
+                times_a = buf_to_int_vec(times_buf_a);
+                memset(times_buf_a, 0, sizeof(times_buf_a));
+                if (times_a.size() != 0) 
+                {
+                    for (int i = 0; i < times_a.size(); i += 2) 
+                    {
+                        cout << "[" << times_a[i] << "," << times_a[i + 1] << "]";
+                        // print "," if not the last element
+                        if (i != times_a.size() - 2) 
+                        {
+                            cout << ",";
+                        }
+                    }
+                }
+            }
+            cout << "]." << endl;
+        }
+
+        // print correct on screen msg after receiving timeslots from server B
+        if (users_b.size() > 0) { 
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
             if (strcmp(times_buf_b, "empty") != 0) {
@@ -537,10 +542,10 @@ int main(int argc, const char* argv[]){
                         }
                     }
                 }
-        }
+            }
             cout << "]." << endl;
         }
-    
+            
         // run an algo to get the final time slots that works for all participants
         vector<int> intersects;
         if (users_a.size() == 0) 
@@ -570,7 +575,6 @@ int main(int argc, const char* argv[]){
                     cout << ",";
                 }
             }
-            cout << "]." << endl;
             
             // send the result back to the client via tcp (from beej's guide)
             char intersects_buf[INTERSECTS_BUF_SIZE];
@@ -588,6 +592,7 @@ int main(int argc, const char* argv[]){
                 perror("serverM: send");
             }
         }
+        cout << "]." << endl;
         
         // print correct on screen msg after sending the final time slots
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
