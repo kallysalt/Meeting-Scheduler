@@ -583,6 +583,9 @@ int main(int argc, const char* argv[]){
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
 
+        times_b.clear();
+        times_a.clear();
+
         // TODO: send valid usernames to client (from beej's guide)
         // char valid_users_buf[CLIENT_MAXDATASIZE];
         // str_vec_to_buf(valid_users, valid_users_buf);
