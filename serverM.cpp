@@ -538,17 +538,18 @@ int main(int argc, const char* argv[]){
         }
     
         // run an algo to get the final time slots that works for all participants
+        vector<int> intersects;
         if (users_a.size() == 0) 
         {
-            times_a.push_back(0);
-            times_a.push_back(100);
+            intersects = times_b;
         }
-        if (users_b.size() == 0) 
+        else if (users_b.size() == 0) 
         {
-            times_b.push_back(0);
-            times_b.push_back(100);
+            intersects = times_a;
         }
-        vector<int> intersects = find_final_time_slots(times_a, times_b);
+        else {
+            intersects = find_final_time_slots(times_a, times_b);
+        }
 
         // print correct on screen msg after finding the final time slots
         cout << "Found the intersection between the results from server A and B: [";
