@@ -203,7 +203,7 @@ int main(int argc, const char* argv[])
     hints_udp_a.ai_flags = AI_PASSIVE; 
     if ((rv_udp_a = getaddrinfo(localhost, UDP_PORT_A, &hints_udp_a, &servinfo_udp_a)) != 0) 
     {
-        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_a));
+        fprintf(stderr, "serverA getaddrinfo: %s\n", gai_strerror(rv_udp_a));
         return 1;
     }
 
@@ -214,13 +214,13 @@ int main(int argc, const char* argv[])
     {
         if ((sockfd = socket(p_udp_a->ai_family, p_udp_a->ai_socktype, p_udp_a->ai_protocol)) == -1) 
         {
-            perror("serverA talker: socket");
+            perror("serverA: socket");
             continue;
         }
         if (bind(sockfd, p_udp_a->ai_addr, p_udp_a->ai_addrlen) == -1) 
         {
             close(sockfd);
-            perror("serverA udp: bind");
+            perror("serverA: bind");
             continue;
         }
         break;
@@ -229,7 +229,7 @@ int main(int argc, const char* argv[])
     // handle error cases (from beej's guide)
     if (p_udp_a == NULL) 
     { 
-        fprintf(stderr, "serverA talker: failed to create socket\n");
+        fprintf(stderr, "serverA: failed to create socket\n");
         return 2;
     }
 
@@ -245,7 +245,7 @@ int main(int argc, const char* argv[])
     hints_udp_m.ai_flags = AI_PASSIVE; 
     if ((rv_udp_m = getaddrinfo(localhost, UDP_PORT_M, &hints_udp_m, &servinfo_udp_m)) != 0) 
     {
-        fprintf(stderr, "serverA talker getaddrinfo: %s\n", gai_strerror(rv_udp_m));
+        fprintf(stderr, "serverA getaddrinfo: %s\n", gai_strerror(rv_udp_m));
         return 1;
     }
 
@@ -257,7 +257,7 @@ int main(int argc, const char* argv[])
     // send all usernames it has to server M via udp over specified port (from beej's guide)
     if ((sendto(sockfd, usernames, strlen(usernames), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
     {
-        perror("serverA talker: sendto");
+        perror("serverA: sendto");
         exit(1);
     }
 
@@ -276,11 +276,10 @@ int main(int argc, const char* argv[])
         addr_len = sizeof their_addr;
         int numbytes = 0;
         if ((numbytes = recvfrom(sockfd, buf, USERNAMES_BUF_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
-            perror("serverA talker: recvfrom");
+            perror("serverA: recvfrom");
             exit(1);
         }
         buf[numbytes] = '\0';
-        // cout << "dbg: received active users buf is " << buf << endl;
 
         // print correct on screen msg indicating the success of receiving usernames from the main server
         cout << "Server A received the usernames from Main Server using UDP over port " << UDP_PORT_A << "." << endl;
@@ -299,29 +298,36 @@ int main(int argc, const char* argv[])
         char intersects_buf[INTERSECTS_BUF_SIZE];
         memset(intersects_buf, 0, sizeof(intersects_buf));
         int_vec_to_buf(intersects, intersects_buf);
-        if (names.size() != 0) 
-        {
-            cout << "Found the intersection result: ";
-            cout << "[";    
 
-            for (int i = 0; i < intersects.size(); i += 2) {
-                cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
-                // print "," if not the last element
-                if (i != intersects.size() - 2) 
-                {
-                    cout << ",";
-                }
+        cout << "Found the intersection result: ";
+        cout << "[";    
+
+        for (int i = 0; i < intersects.size(); i += 2) {
+            cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
+            // print "," if not the last element
+            if (i != intersects.size() - 2) 
+            {
+                cout << ",";
             }
-            cout << "] for " << names_buf << "." << endl;
         }
+        cout << "] for " << names_buf << "." << endl;
 
         // send the result back to the main server (from beej's guide)
-        if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+        if (intersects.size() == 0) 
         {
-            perror("serverA talker: sendto");
-            exit(1);
+            if ((sendto(sockfd, "empty", 5, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+            {
+                perror("serverA: sendto");
+                exit(1);
+            }
         }
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
+        else {
+            if ((sendto(sockfd, intersects_buf, strlen(intersects_buf), 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+            {
+                perror("serverA: sendto");
+                exit(1);
+            }
+        }
 
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;

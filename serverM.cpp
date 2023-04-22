@@ -393,7 +393,7 @@ int main(int argc, const char* argv[]){
         {
             if(send(new_fd, "fail", 4, 0) == -1)
             {
-                perror("client: send");
+                perror("serverM tcp: send");
             }
             continue;
             // cout << "dbg: continue does't work " << endl;
@@ -406,7 +406,7 @@ int main(int argc, const char* argv[]){
             str_vec_to_buf(invalid_users, invalid_users_buf);
             if (send(new_fd, invalid_users_buf, strlen(invalid_users_buf), 0) == -1) 
             {
-                perror("client: send");
+                perror("serverM tcp: send");
             }
             // print correct on screen msg after sending invalid usernames to client
             cout << invalid_users_buf << " do not exist. Send a reply to the client." << endl;
@@ -415,7 +415,7 @@ int main(int argc, const char* argv[]){
         {
             if (send(new_fd, "pass", 4, 0) == -1) 
             {
-                perror("client: send");
+                perror("serverM tcp: send");
             }
         }
 
@@ -485,7 +485,7 @@ int main(int argc, const char* argv[]){
                     }
                 }
             }
-            cout << "]" << endl;
+            cout << "]." << endl;
         }
 
         // if there are valid usernames for server B
@@ -538,7 +538,7 @@ int main(int argc, const char* argv[]){
                     }
                 }
         }
-            cout << "]" << endl;
+            cout << "]." << endl;
         }
     
         // run an algo to get the final time slots that works for all participants
