@@ -550,7 +550,7 @@ int main(int argc, const char* argv[]){
         else {
             intersects = find_final_time_slots(times_a, times_b);
         }
-        cout < "dbg: intersects: ":
+        cout < "dbg: intersects: ";
         for (int i = 0; i < intersects.size(); i++) {
             cout << intersects[i] << " ";
         }
