@@ -469,6 +469,7 @@ int main(int argc, const char* argv[]){
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
             times_a = buf_to_int_vec(times_buf_a);
+            cout << "dbg: times buf a: " << times_buf_a << endl;
             memset(times_buf_a, 0, sizeof(times_buf_a));
             if (times_a.size() != 0) 
             {
@@ -519,6 +520,7 @@ int main(int argc, const char* argv[]){
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
             times_b = buf_to_int_vec(times_buf_b);
+            cout << "dbg: times buf b: " << times_buf_b << endl;
             memset(times_buf_b, 0, sizeof(times_buf_b));
             if (times_b.size() != 0) 
             {
