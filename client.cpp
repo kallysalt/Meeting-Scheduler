@@ -110,6 +110,9 @@ int main(int argc, const char* argv[]){
         // cout << "dbg: input is " << input.c_str() << endl;
         // cout << "dbg: sent input to main" << endl;
 
+        // print on screen msg after sending usernames to the main server
+        cout << "Client finished sending the usernames to Main Server." << endl;
+
         // receive a msg saying which usernames do not exist from the main server over tcp (from beej's guide)
         char invalid_buf[USERNAMES_BUF_SIZE];
         memset(invalid_buf, 0, sizeof(invalid_buf));
@@ -137,9 +140,6 @@ int main(int argc, const char* argv[]){
             cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
             cout << invalid_buf << " do not exist." << endl;
         }
-
-        // print on screen msg after sending usernames to the main server
-        cout << "Client finished sending the usernames to Main Server." << endl;
 
         // wait for time availability of all users in the meeting from the main server over tcp (from beej's guide)
         char intersects_buf[INTERSECTS_BUF_SIZE];
