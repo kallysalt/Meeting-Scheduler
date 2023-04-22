@@ -316,6 +316,12 @@ int main(int argc, const char* argv[])
         // }
 
         // send the result back to the main server (from beej's guide)
+        cout << "dbg: intersects from b is ";
+        for (int i = 0; i < intersects.size(); i++) {
+            cout << "dbg: intersects[" << i << "] is " << intersects[i] << endl;
+        }
+        cout << endl;
+
         if (intersects.size() == 0) 
         {
             if ((sendto(sockfd, "empty", 5, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
