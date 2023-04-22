@@ -550,6 +550,11 @@ int main(int argc, const char* argv[]){
         else {
             intersects = find_final_time_slots(times_a, times_b);
         }
+        cout < "dbg: intersects: ":
+        for (int i = 0; i < intersects.size(); i++) {
+            cout << intersects[i] << " ";
+        }
+        cout << "." << endl;
 
         // print correct on screen msg after finding the final time slots
         cout << "Found the intersection between the results from server A and B: [";
