@@ -16,7 +16,7 @@ void get_in_port(struct sockaddr_storage &their_addr, char *port)
     sprintf(port, "%u", port_num);
 }
 
-// convert a times buffer (times are separated by ' ') to a vector of strings
+// convert a buffer (separated by ' ') to a vector of strings
 vector<string> buf_to_string_vec(char *buf)
 {
     vector<string> times;
@@ -28,6 +28,20 @@ vector<string> buf_to_string_vec(char *buf)
         time = strtok(NULL, " ");
     }
     return times;
+}
+
+// convert a names buffer (names are separated by ', ') to a set of strings
+set<string> buf_to_string_set(char *buf)
+{
+    set<string> names;
+    char *name;
+    name = strtok(buf, ", ");
+    while (name != NULL) 
+    {
+        names.insert(string(name));
+        name = strtok(NULL, ", ");
+    }
+    return names;
 }
 
 int main(int argc, const char* argv[]){
@@ -100,7 +114,6 @@ int main(int argc, const char* argv[]){
         cout << "Please enter the usernames to check schedule availability:" << endl;
         getline(cin, input);
 
-
         // send these names to the main server over tcp (from beej's guide)
         if (send(sockfd, input.c_str(), input.length(), 0) == -1)
         {
@@ -145,15 +158,6 @@ int main(int argc, const char* argv[]){
         }
         intersects_buf[numbytes] = '\0';
 
-        // TODO: receive valid users buf from the main server over tcp (from beej's guide)
-        char valid_buf[USERNAMES_BUF_SIZE];
-        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-        {
-            perror("client: recv");
-            exit(1);
-        }
-        valid_buf[numbytes] = '\0';
-
         // print on screen msg after receiving availability of all users in the meeting from the main server
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
@@ -172,10 +176,31 @@ int main(int argc, const char* argv[]){
         cout << "]";
 
         // print valid names
-        cout << " works for " << "<temp>" << "." << endl;
-        cout << "dbg: valid_buf is " << valid_buf << endl;
+        // parse input, store in a vector
+        char input_buf [USERNAMES_BUF_SIZE];
+        strcpy(input_buf, input.c_str());
+        vector<string> input_names = buf_to_string_vec(input_buf);
+        // parse invalid puf, store in a set
+        set<string> invalid_names;
+        invalid_names = buf_to_string_set(invalid_buf);
+        int num_valid_names = input_names.size() - invalid_names.size();
+        // if name is not in the invalid set, print it
+        cout << " works for ";
+        for (int i = 0; i < input_names.size(); i++) 
+        {
+            if (invalid_names.find(input_names[i]) != invalid_names.end()) 
+            {
+                cout << input_names[i];
+                // print "," if not the last element
+                if (i != num_valid_names - 1) {
+                    cout << ",";
+                }
+            }
+        }
+        cout << "." << endl;
 
         // start a new request 
+        input.clear();
         cout << "-----Start a new request-----" << endl;
     }
 
