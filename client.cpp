@@ -107,8 +107,6 @@ int main(int argc, const char* argv[]){
             perror("client: send");
             exit(1);
         }
-        // cout << "dbg: input is " << input.c_str() << endl;
-        // cout << "dbg: sent input to main" << endl;
 
         // print on screen msg after sending usernames to the main server
         cout << "Client finished sending the usernames to Main Server." << endl;
@@ -123,19 +121,15 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         invalid_buf[numbytes] = '\0';
-        // cout << "dbg: invalid_buf is " << invalid_buf << endl;
-        // cout << "dbg: recvd invalid buf from main" << endl;
 
         // TODO: if none of the usernames is valid, stop this iteration to request for another client input
         if (strcmp(invalid_buf, "fail") == 0) 
         {
-            // TODO: print some error msg?
-            // cout << "invalid buf is fail" << endl;
+            // ASK: print some error msg?
             continue;
         }
 
         // if some of the usernames do not exist, print: <username1, username2, ...> do not exist
-        // todo
         if (strcmp(invalid_buf, "pass") != 0) {
             cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
             cout << invalid_buf << " do not exist." << endl;
@@ -150,23 +144,10 @@ int main(int argc, const char* argv[]){
             exit(1);
         }
         intersects_buf[numbytes] = '\0';
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
-
-        // TODO: receive valid users buf from the main server over tcp (from beej's guide)
-        // char valid_buf[USERNAMES_BUF_SIZE];
-        // if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
-        // {
-        //     perror("client: recv");
-        //     exit(1);
-        // }
-        // valid_buf[numbytes] = '\0';
-        // cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // print on screen msg after receiving availability of all users in the meeting from the main server
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
-        // cout << "dbg: intersects.size() is " << intersects.size() << endl;
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         if (strcmp(intersects_buf, "empty") != 0) 
         {
             vector<string> intersects = buf_to_string_vec(intersects_buf);
@@ -183,6 +164,16 @@ int main(int argc, const char* argv[]){
 
         // print valid names
         cout << " works for " << "<temp>" << "." << endl;
+
+        // TODO: receive valid users buf from the main server over tcp (from beej's guide)
+        char valid_buf[USERNAMES_BUF_SIZE];
+        if ((numbytes = recv(sockfd, valid_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+        valid_buf[numbytes] = '\0';
+        cout << "dbg: valid_buf is " << valid_buf << endl;
 
         // start a new request 
         cout << "-----Start a new request-----" << endl;
