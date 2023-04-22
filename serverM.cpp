@@ -445,7 +445,6 @@ int main(int argc, const char* argv[]){
         socklen_t addr_len_udp_a;
         addr_len_udp_a = sizeof addr_udp_a;
         vector<int> times_a;
-
         if (users_a.size() > 0) 
         {
             // send names managed by server A to server A (from beej's guide)
@@ -465,11 +464,12 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_a[numbytes] = '\0';
+            cout << "dbg: times buf a: " << times_buf_a << endl;
+
             // print correct on screen msg after receiving timeslots from server A
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
             times_a = buf_to_int_vec(times_buf_a);
-            cout << "dbg: times buf a: " << times_buf_a << endl;
             memset(times_buf_a, 0, sizeof(times_buf_a));
             if (times_a.size() != 0) 
             {
@@ -516,11 +516,11 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_b[numbytes] = '\0';
+            cout << "dbg: times buf b: " << times_buf_b << endl;
             // print correct on screen msg after receiving timeslots from server B
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
             times_b = buf_to_int_vec(times_buf_b);
-            cout << "dbg: times buf b: " << times_buf_b << endl;
             memset(times_buf_b, 0, sizeof(times_buf_b));
             if (times_b.size() != 0) 
             {
@@ -583,9 +583,6 @@ int main(int argc, const char* argv[]){
         // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
 
-        times_b.clear();
-        times_a.clear();
-
         // TODO: send valid usernames to client (from beej's guide)
         // char valid_users_buf[CLIENT_MAXDATASIZE];
         // str_vec_to_buf(valid_users, valid_users_buf);
@@ -596,7 +593,5 @@ int main(int argc, const char* argv[]){
         // cout << "dbg: valid_users_buf is " << valid_users_buf << endl;
     }
 
-    close(new_fd);
-    close(sockfd_udp_m);
     return 0;
 }
