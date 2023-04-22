@@ -569,14 +569,14 @@ int main(int argc, const char* argv[]){
             int_vec_to_buf(intersects, intersects_buf);
             if (send(new_fd, intersects_buf, strlen(intersects_buf), 0) == -1) 
             {
-                perror("client: send");
+                perror("serverM: send");
             }
         }
         else {
             // send the result back to the client via tcp (from beej's guide)
-            if (send(new_fd, "]", 1, 0) == -1) 
+            if (send(new_fd, "empty", 5, 0) == -1) 
             {
-                perror("client: send");
+                perror("serverM: send");
             }
         }
         
