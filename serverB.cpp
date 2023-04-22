@@ -316,7 +316,7 @@ int main(int argc, const char* argv[])
         // }
 
         // send the result back to the main server (from beej's guide)
-        if (strlen(intersects_buf) == 0) 
+        if (intersects.size() == 0) 
         {
             if ((sendto(sockfd, "-1 -1", 5, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
             {
