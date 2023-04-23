@@ -11,3 +11,7 @@
 - the main server also plays a role of handling requests from clients
 
 references: beej
+
+additional file: project.h, which is used to share common code (e.g. libraries to include, type definitions, global variables) between different files
+
+assumption: okay for client input to contain more than one consecutive white spaces
