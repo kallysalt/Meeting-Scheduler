@@ -347,7 +347,7 @@ int main(int argc, const char* argv[])
         else
         {
             // update datebase
-            cout << "Register a meeting at " << buf << " and update the availability for the following users:" << endl;
+            cout << "Register a meeting at " << buf2 << " and update the availability for the following users:" << endl;
             // TODO: <username 1>: updated from <original time availability list> to <updated time availability list>"
             
             // send a message to server M to notify it that the registration has finished

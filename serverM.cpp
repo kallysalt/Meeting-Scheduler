@@ -634,7 +634,7 @@ int main(int argc, const char* argv[]){
         else // send the interval to involved servers
         {
             // print correct on screen msg after receiving the interval from client
-            cout << "Main Server received from client the final meeting time using TCP over port" << TCP_PORT_M << "." << endl;
+            cout << "Main Server received from client the final meeting time using TCP over port" << TCP_PORT_M << ":" << endl;
             cout << buf << endl;
             
             // only if a is involved -> send the interval to server A via udp
