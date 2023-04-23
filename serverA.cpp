@@ -86,8 +86,6 @@ void schedules_to_names_buf(schedules scheds, char *buf)
 // convert a names buffer (names are separated by ', ') to a vector of strings
 vector<string> names_buf_to_vec(char *buf)
 {
-    // TODO: what if names buffer is empty
-    
     vector<string> names;
     char *name;
     name = strtok(buf, ", ");
@@ -184,6 +182,22 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
         intersects.insert(intersects.begin(), new_intersects.begin(), new_intersects.end());
     }
     return intersects;
+}
+
+// print a schedule
+void print_sched(schedule sched)
+{
+    cout << "[";
+    for (int i = 0; i < sched.size(); i++) 
+    {
+        cout << "[" << sched[i].first << "," << sched[i].second << "]";
+    }
+    // print "," after each schedule, except the last one
+    if (i < sched.size() - 1) 
+    {
+        cout << ",";
+    }
+    cout << "]" << endl;
 }
 
 int main(int argc, const char* argv[])
@@ -349,6 +363,15 @@ int main(int argc, const char* argv[])
             // update datebase
             cout << "Register a meeting at " << buf2 << " and update the availability for the following users:" << endl;
             // TODO: <username 1>: updated from <original time availability list> to <updated time availability list>"
+            for (int i = 0; i < names.size(); i++) 
+            {
+                cout << names[i] << ": updated from ";
+                print_sched(scheds[names[i]]);
+                cout << " to ";
+                // update_sched(scheds[names[i]], buf2);
+                print_sched(scheds[names[i]]);
+                cout << endl;
+            }
             
             // send a message to server M to notify it that the registration has finished
             if ((sendto(sockfd, "finished", 8, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 

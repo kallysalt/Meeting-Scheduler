@@ -86,8 +86,6 @@ void schedules_to_names_buf(schedules scheds, char *buf)
 // convert a names buffer (names are separated by ', ') to a vector of strings
 vector<string> names_buf_to_vec(char *buf)
 {
-    // TODO: what if names buffer is empty
-
     vector<string> names;
     char *name;
     name = strtok(buf, ", ");

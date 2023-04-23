@@ -676,7 +676,7 @@ int main(int argc, const char* argv[]){
                     exit(1);
                 }
                 finish_buf[numbytes] = '\0';
-                // TODO: print correct on screen msg after receiving the confirmation from server B
+                // print correct on screen msg after receiving the confirmation from server B
                 cout << "Main Server received the confirmation from Server B using UDP over port" << UDP_PORT_M << "." << endl;
             }
 

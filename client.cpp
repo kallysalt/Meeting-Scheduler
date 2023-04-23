@@ -123,7 +123,7 @@ int main(int argc, const char* argv[]){
         return 2;
     }
 
-    // TODO: assign dyanmic port address to the client's tcp socket
+    // assign dyanmic port address to the client's tcp socket
     struct sockaddr_storage my_addr;
     socklen_t my_addrlen = sizeof my_addr;
     int getsock_check = getsockname(sockfd, (struct sockaddr*) &my_addr, (socklen_t *) &my_addrlen);
