@@ -601,20 +601,17 @@ int main(int argc, const char* argv[]){
         // sleep (0.05 seconds)
         usleep(50000); 
 
-        // send valid buf to client via udp (from beej's guide)
+        // send valid buf to client via udp 
         char valid_buf[CLIENT_MAXDATASIZE];
         memset(valid_buf, 0, sizeof(valid_buf));
         str_vec_to_buf(valid_users, valid_buf);
-
         if (send(new_fd, valid_buf, strlen(valid_buf), 0) == -1) 
         {
             perror("serverM: send");
         }
         
         // print correct on screen msg after sending the final time slots
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
-
     }
 
     return 0;
