@@ -44,6 +44,46 @@ set<string> buf_to_string_set(char *buf)
     return names;
 }
 
+// check if time interval entered by client is valid
+int validate_time_interval(string input, vector<string> intersects) 
+{
+    // TODO: check if user input is valid
+    if (input[0]!= '[' || input[input.size()-1] != ']') 
+    {
+        return 0;
+    }
+
+    // store avaialble times in a integer vector
+    vector<int> times(intersects.size());
+    for (int i = 0; i < intersects.size(); i++) 
+    {
+        stringstream ss(intersects[i]);
+        ss >> times[i];
+    }
+
+    // store requested time in a integer vector
+    vector<int> requested_time;    
+    stringstream ss(input);
+    char c;
+    int n;
+    while (ss >> c >> n >> c) 
+    {
+        requested_time.push_back(n);
+    }
+    cout << "requested time: " << requested_time[0] << " " << requested_time[1] << endl;
+
+    // compare to see if requested time is valid
+    int start = requested_time[0];
+    int end = requested_time[1];
+    for (int i = 0; i < times.size(); i += 2) 
+    {
+        if (start >= times[i] && end <= times[i+1]) {
+            return 1; // found -> valid
+        }
+    }
+    return 0; // never found -> not valid
+}
+
 int main(int argc, const char* argv[]){
 
     // print boot up msg ( after servers are booted up backedn servers sent usernames to the main server?) //////////
@@ -161,9 +201,10 @@ int main(int argc, const char* argv[]){
         // print on screen msg after receiving availability of all users in the meeting from the main server
         cout << "Client received the reply from Main Server using TCP over port " << tcp_port_client << ":" << endl;
         cout << "Time intervals [";
+        vector<string> intersects;
         if (strcmp(intersects_buf, "empty") != 0) 
         {
-            vector<string> intersects = buf_to_string_vec(intersects_buf);
+            intersects = buf_to_string_vec(intersects_buf);
             for (int i = 0; i < intersects.size(); i += 2) 
             {
                 cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
@@ -176,14 +217,47 @@ int main(int argc, const char* argv[]){
         cout << "]";
 
         // receive valid user names from server m over tcp and print valid names
-        char valid_buf[CLIENT_MAXDATASIZE];
-        memset(valid_buf, 0, sizeof(valid_buf));
-        if ((numbytes = recv(sockfd, valid_buf, CLIENT_MAXDATASIZE - 1, 0)) == -1)
+        char valid_names_buf[CLIENT_MAXDATASIZE];
+        memset(valid_names_buf, 0, sizeof(valid_names_buf));
+        if ((numbytes = recv(sockfd, valid_names_buf, CLIENT_MAXDATASIZE - 1, 0)) == -1)
         {
             perror("client: recv");
             exit(1);
         }
-        cout << " works for " << valid_buf << "." << endl;
+        cout << " works for " << valid_names_buf << "." << endl;
+
+        // if no valid time interval -> notify server m, continue to go to next iteration
+        // if valid time interval -> ask user to schedule a meeting
+        if (intersects.size() == 0) {
+            // send "stop" to server m over tcp
+            if (send(sockfd, "stop", 4, 0) == -1)
+            {
+                perror("client: send");
+                exit(1);
+            }
+            continue;
+        }
+        else // get user input
+        {
+            input.clear();
+            cout << "Please enter the final meeting time to register an meeting:" << endl;
+            getline(cin, input);
+        }
+
+        // if user input is not valid -> ask user to enter again
+        int valid = validate_time_interval(input, intersects);
+        while (!valid) {
+            cout << "Time interval <[t_start, t_end]> is not valid. Please enter again:" << endl;
+            getline(cin, input);
+            valid = validate_time_interval(input, intersects);
+        }
+
+        // if user input is valid -> send meeting time to the main server over tcp
+        if (send(sockfd, input.c_str(), input.length(), 0) == -1)
+        {
+            perror("client: send");
+            exit(1);
+        }
 
         // start a new request 
         input.clear();

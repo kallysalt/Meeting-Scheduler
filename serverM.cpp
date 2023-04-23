@@ -358,9 +358,9 @@ int main(int argc, const char* argv[]){
 
     // set up finishes ///////////////////////////////////////////////////////////////////////////////////////////
 
-    while (1) // main accept loop (from beej's guide)
+    while (1) 
     {  
-        // receive names sent from client via tcp (from beej's guide) (todo: make sure prepared)
+        // receive names sent from client via tcp (from beej's guide) 
         char names_buf[USERNAMES_BUF_SIZE];
         memset(names_buf, 0, sizeof(names_buf));
         if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
@@ -599,6 +599,76 @@ int main(int argc, const char* argv[]){
         
         // print correct on screen msg after sending the final time slots
         cout << "Main Server sent the result to the client." << endl;
+
+        // wait for client msg to see if further action
+        // if no further action -> continue to go to the next interation
+        // if has further action -> pass the received interval to involved servers
+        char buf[INTERVAL_SIZE];
+        if ((numbytes = recv(new_fd, buf, INTERVAL_SIZE - 1, 0)) == -1) 
+        {
+            perror("serverM: recv");
+            exit(1);
+        }
+        if (strcmp(buf, "stop") == 0) 
+        {
+            // tell server a & b to stop waiting if they are involved
+            if (users_a.size() > 0) {
+                // tell server a to stop waiting
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            if (users_a.size() > 0) {
+                // tell server a to stop waiting
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            // continue to go to the next interation
+            continue;
+        }
+        else // send the interval to involved servers
+        {
+            // if a is involved -> send the interval to server A via udp
+            if (users_a.size() > 0) {
+                // send the interval to server A via udp
+                if ((numbytes = sendto(sockfd_udp_m, buf, strlen(buf), 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            else // send "stop" to server A via udp
+            {
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            // if b is involved -> send the interval to server B via udp
+            if (users_b.size() > 0) {
+                // send the interval to server A via udp
+                if ((numbytes = sendto(sockfd_udp_m, buf, strlen(buf), 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            else // send "stop" to server B via udp
+            {
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+        }
+
     }
 
     return 0;

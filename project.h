@@ -40,3 +40,4 @@ typedef vector<pair< int,int> > schedule;
 #define CLIENT_MAXDATASIZE (2 * (MAX_LEN_USERNAME * MAX_NUM_INPUT + MAX_NUM_INPUT)) // ?
 #define TIME_SLOTS_BUF_SIZE 202 // ?
 #define INTERSECTS_BUF_SIZE 402 // ?
+#define INTERVAL_SIZE 20

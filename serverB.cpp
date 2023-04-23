@@ -329,8 +329,7 @@ int main(int argc, const char* argv[])
             }
         }
 
-        // Print correct on screen msg indicating the success of sending the response to the main server
-        cout << "Server B finished sending the response to Main Server." << endl;
+        // TODO
     }
 
     // free the linked-list (from beej's guide)
