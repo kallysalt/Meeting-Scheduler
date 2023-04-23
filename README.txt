@@ -16,3 +16,5 @@ additional file: project.h, which is used to share common code (e.g. libraries t
 
 assumption: okay for client input to contain more than one consecutive white spaces
 client interval should have no extra space
+
+if none is valid, "None of the usernames being entered is valid." 

@@ -177,6 +177,7 @@ int main(int argc, const char* argv[]){
         if (strcmp(invalid_buf, "fail") == 0) 
         {
             // ASK: print some error msg?
+            cout << "None of the usernames being entered is valid." << endl;
             continue;
         }
 
@@ -225,7 +226,7 @@ int main(int argc, const char* argv[]){
         valid_names_buf[numbytes] = '\0';
         cout << " works for " << valid_names_buf << "." << endl;
 
-        // if no valid time interval -> notify server m, continue to go to next iteration ///////////////////////////
+        // if no valid time interval -> notify server m /////////////////////////////////////////////////////////////
         // if valid time interval -> ask user to schedule a meeting 
         if (intersects.size() == 0) {
             // send "stop" to server m over tcp
@@ -234,6 +235,10 @@ int main(int argc, const char* argv[]){
                 perror("client: send");
                 exit(1);
             }
+            // start a new request 
+            input.clear();
+            cout << "-----Start a new request-----" << endl;
+            // continue to go to next iteration
             continue;
         }
         else // get user input
