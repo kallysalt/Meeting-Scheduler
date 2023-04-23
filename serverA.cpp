@@ -191,11 +191,11 @@ void print_sched(schedule sched)
     for (int i = 0; i < sched.size(); i++) 
     {
         cout << "[" << sched[i].first << "," << sched[i].second << "]";
-    }
-    // print "," after each schedule, except the last one
-    if (i < sched.size() - 1) 
-    {
-        cout << ",";
+        // print "," after each schedule, except the last one
+        if (i < sched.size() - 1) 
+        {
+            cout << ",";
+        }
     }
     cout << "]" << endl;
 }
