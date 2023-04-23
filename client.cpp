@@ -61,7 +61,7 @@ int validate_time_interval(string input, vector<string> intersects)
         ss >> times[i];
     }
 
-    // store requested time in a integer vector
+    // parse user input and store requested time in a integer vector
     stringstream ss(input.substr(1, input.size()-2));
     vector<int> requested_time;    
     char comma;

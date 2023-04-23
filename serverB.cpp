@@ -329,7 +329,30 @@ int main(int argc, const char* argv[])
             }
         }
 
-        // TODO
+        // Print correct on screen msg indicating the success of sending the response to the main server
+        cout << "Server B finished sending the response to Main Server." << endl;
+
+        // receive update from server m to see if need to update its database
+        char buf2[INTERVAL_SIZE];
+        if ((numbytes = recvfrom(sockfd, buf2, INTERVAL_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
+            perror("serverB: recvfrom");
+            exit(1);
+        }
+        // if not -> continue to go to the next iteration
+        if (strcmp(buf2, "stop") == 0) {
+            continue;
+        }
+        // if yes -> update its database to remove this time interval from the involved users time availability list
+        else
+        {
+            // update datebase
+            cout << "Server B is updating its database." << endl;
+        }
+
+        // print the on-screen messages showing the updates:
+        // "Register a meeting at <time slot> and update the availability for the following users:
+        // <username 1>: updated from <original time availability list> to <updated time availability list>"
+
     }
 
     // free the linked-list (from beej's guide)

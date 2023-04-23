@@ -349,10 +349,6 @@ int main(int argc, const char* argv[])
             cout << "Server A is updating its database." << endl;
         }
 
-
-
-
-
         // print the on-screen messages showing the updates:
         // "Register a meeting at <time slot> and update the availability for the following users:
         // <username 1>: updated from <original time availability list> to <updated time availability list>"
