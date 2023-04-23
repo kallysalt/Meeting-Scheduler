@@ -180,20 +180,32 @@ int main(int argc, const char* argv[]){
         char input_buf [USERNAMES_BUF_SIZE];
         strcpy(input_buf, input.c_str());
         vector<string> input_names = buf_to_string_vec(input_buf);
-        // parse invalid puf, store in a set
-        set<string> invalid_names;
-        invalid_names = buf_to_string_set(invalid_buf);
-        int num_valid_names = input_names.size() - invalid_names.size();
-        // if name is not in the invalid set, print it
+        // parse invalid puf, store in a set, if name is not in the invalid set, print it
         cout << " works for ";
-        for (int i = 0; i < input_names.size(); i++) 
+        if (strcmp(invalid_buf, "pass") == 0) 
         {
-            if (invalid_names.find(input_names[i]) == invalid_names.end()) 
+            for (int i = 0; i < input_names.size(); i++) 
             {
                 cout << input_names[i];
                 // print "," if not the last element
-                if (i != num_valid_names) {
+                if (i != input_names.size() - 1) {
                     cout << ", ";
+                }
+            }
+        }
+        else {
+            set<string> invalid_names;
+            invalid_names = buf_to_string_set(invalid_buf);
+            int num_valid_names = input_names.size() - invalid_names.size();
+            for (int i = 0; i < input_names.size(); i++) 
+            {
+                if (invalid_names.find(input_names[i]) == invalid_names.end()) 
+                {
+                    cout << input_names[i];
+                    // print "," if not the last element
+                    if (i != num_valid_names) {
+                        cout << ", ";
+                    }
                 }
             }
         }
