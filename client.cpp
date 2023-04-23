@@ -135,7 +135,7 @@ int main(int argc, const char* argv[]){
         }
         invalid_buf[numbytes] = '\0';
 
-        // TODO: if none of the usernames is valid, stop this iteration to request for another client input
+        // if none of the usernames is valid, stop this iteration to request for another client input
         if (strcmp(invalid_buf, "fail") == 0) 
         {
             // ASK: print some error msg?
