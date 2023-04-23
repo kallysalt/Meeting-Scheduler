@@ -62,10 +62,11 @@ int validate_time_interval(string input, vector<string> intersects)
     }
 
     // store requested time in a integer vector
+    stringstream ss(input.substr(1, input.size()-2));
     vector<int> requested_time;    
-    stringstream ss(input);
+    char comma;
     ss >> requested_time[0];
-    ss.ignore(1);
+    ss >> comma;
     ss >> requested_time[1];
     cout << "requested time: " << requested_time[0] << " " << requested_time[1] << endl;
 
