@@ -212,7 +212,7 @@ void update_sched(schedules &scheds, string &name, char *buf)
     }
     new_buf[len - 1] = '\0';
     // pase the new buffer
-    int start_time = atoi(strtok(buf, ","));
+    int start_time = atoi(strtok(new_buf, ","));
     int end_time = atoi(strtok(NULL, "]"));
     scheds[name].push_back(make_pair(start_time, end_time));
 }
