@@ -231,8 +231,6 @@ int main(int argc, const char* argv[]){
     }
     names_buf[numbytes] = '\0';
 
-    // TODO: are both servers guaranteed to send at least one username?
-
     // check which server sent the usernames
     char src_port[10]; // ?
     memset(src_port, 0, sizeof(src_port));
@@ -338,7 +336,7 @@ int main(int argc, const char* argv[]){
         exit(1);
     }
     
-    // prepare for accepting tcp connections from the client (from beej's guide)
+    // accept tcp connections from the client (from beej's guide)
     socklen_t sin_size;
     struct sigaction sa;
     sa.sa_handler = sigchld_handler; // reap all dead processes
@@ -349,7 +347,6 @@ int main(int argc, const char* argv[]){
         perror("sigaction");
         exit(1);
     }
-
     int new_fd; // new connection on new_fd
     struct sockaddr_storage their_addr_tcp; // connector's address information
     sin_size = sizeof their_addr_tcp;
@@ -357,15 +354,12 @@ int main(int argc, const char* argv[]){
     if (new_fd == -1) 
     {
         perror("accept");
-        // continue;
     }
 
     // set up finishes ///////////////////////////////////////////////////////////////////////////////////////////
 
     while (1) // main accept loop (from beej's guide)
     {  
-        // cout << "dbg: main Server is ready for next iteration." << endl;
-
         // receive names sent from client via tcp (from beej's guide) (todo: make sure prepared)
         char names_buf[USERNAMES_BUF_SIZE];
         memset(names_buf, 0, sizeof(names_buf));
@@ -385,8 +379,7 @@ int main(int argc, const char* argv[]){
         vector<int> servers; // store the server each user belongs to (a=0, b=1) 
         validate_client_input(names_buf, invalid_users, valid_users, servers);
 
-        // reply to client with a msg indicating validity of client input
-        // TODO: if all usernames are invalid, buf is empty, or full of empty spaces
+        // reply to client with a msg indicating validity of client input (from beej's guide)
 
         // reply "fail" to client and keep requesting for valid usernames until at least one of them is valid
         if (valid_users.size() == 0) 
@@ -396,7 +389,6 @@ int main(int argc, const char* argv[]){
                 perror("serverM tcp: send");
             }
             continue;
-            // cout << "dbg: continue does't work " << endl;
         }
         // if some users are invalid, reply a msg to client saying which usernames are invalid
         else if (invalid_users.size() > 0) 
@@ -419,6 +411,9 @@ int main(int argc, const char* argv[]){
             }
         }
 
+        // sleep (0.05 seconds)
+        usleep(50000); 
+
         // split them into two sublists based on where the user information is located
         vector<string> users_a;
         vector<string> users_b;
@@ -434,7 +429,7 @@ int main(int argc, const char* argv[]){
             }
         }
         
-        // forward valid usernames to the corresponding backend server via udp
+        // forward valid usernames to the corresponding backend server via udp (from beej's guide)
         
         // if there are valid usernames for server A
         char users_a_buf[USERNAMES_BUF_SIZE];
@@ -464,7 +459,6 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_a[numbytes] = '\0';
-            // cout << "dbg: times buf a: " << times_buf_a << endl;
         }
 
         // if there are valid usernames for server B
@@ -476,7 +470,6 @@ int main(int argc, const char* argv[]){
         socklen_t addr_len_udp_b;
         addr_len_udp_b = sizeof addr_udp_b;
         vector<int> times_b;
-
         if (users_b.size() > 0) 
         {
             // send names managed by server B to server B (from beej's guide)
@@ -497,14 +490,14 @@ int main(int argc, const char* argv[]){
                 exit(1);
             }
             times_buf_b[numbytes] = '\0';
-            // cout << "dbg: times buf b: " << times_buf_b << endl;
         }
 
         // print correct on screen msg after receiving timeslots from server A
         if (users_a.size() > 0) {
             cout << "Main Server received from server A the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
-            if (strcmp(times_buf_a, "empty") != 0) {
+            if (strcmp(times_buf_a, "empty") != 0) 
+            {
                 times_a = buf_to_int_vec(times_buf_a);
                 memset(times_buf_a, 0, sizeof(times_buf_a));
                 if (times_a.size() != 0) 
@@ -527,7 +520,8 @@ int main(int argc, const char* argv[]){
         if (users_b.size() > 0) { 
             cout << "Main Server received from server B the intersection result using UDP over port " << UDP_PORT_M << ":" << endl;
             cout << "[";
-            if (strcmp(times_buf_b, "empty") != 0) {
+            if (strcmp(times_buf_b, "empty") != 0) 
+            {
                 times_b = buf_to_int_vec(times_buf_b);
                 memset(times_buf_b, 0, sizeof(times_buf_b));
                 if (times_b.size() != 0) 
@@ -559,16 +553,12 @@ int main(int argc, const char* argv[]){
         else {
             intersects = find_final_time_slots(times_a, times_b);
         }
-        // cout << "dbg: intersects: ";
-        // for (int i = 0; i < intersects.size(); i++) {
-        //     cout << intersects[i] << " ";
-        // }
-        // cout << "." << endl;
 
         // print correct on screen msg after finding the final time slots
         cout << "Found the intersection between the results from server A and B:" << endl;
         cout << "[";
-        if (intersects.size() != 0) {
+        if (intersects.size() != 0) 
+        {
             for (int i = 0; i < intersects.size(); i += 2) {
                 cout << "[" << intersects[i] << "," << intersects[i + 1] << "]";
                 // print "," if not the last element
@@ -594,11 +584,21 @@ int main(int argc, const char* argv[]){
             }
         }
         cout << "]." << endl;
+
+        // sleep (0.05 seconds)
+        usleep(50000); 
+
+        // send valid buf to client via udp
+        char valid_buf[CLIENT_MAXDATASIZE];
+        memset(valid_buf, 0, sizeof(valid_buf));
+        str_vec_to_buf(valid_users, valid_buf);
+        if (send(new_fd, valid_buf, strlen(valid_buf), 0) == -1) 
+        {
+            perror("serverM: send");
+        }
         
         // print correct on screen msg after sending the final time slots
-        // cout << "dbg: intersects_buf is " << intersects_buf << endl;
         cout << "Main Server sent the result to the client." << endl;
-
     }
 
     return 0;

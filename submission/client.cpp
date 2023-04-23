@@ -135,7 +135,7 @@ int main(int argc, const char* argv[]){
         }
         invalid_buf[numbytes] = '\0';
 
-        // TODO: if none of the usernames is valid, stop this iteration to request for another client input
+        // if none of the usernames is valid, stop this iteration to request for another client input
         if (strcmp(invalid_buf, "fail") == 0) 
         {
             // ASK: print some error msg?
@@ -175,42 +175,15 @@ int main(int argc, const char* argv[]){
         }
         cout << "]";
 
-        // print valid names
-        // parse input, store in a vector
-        char input_buf [USERNAMES_BUF_SIZE];
-        strcpy(input_buf, input.c_str());
-        vector<string> input_names = buf_to_string_vec(input_buf);
-        // parse invalid puf, store in a set, if name is not in the invalid set, print it
-        cout << " works for ";
-        if (strcmp(invalid_buf, "pass") == 0) 
+        // receive valid user names from server m over tcp and print valid names
+        char valid_buf[CLIENT_MAXDATASIZE];
+        memset(valid_buf, 0, sizeof(valid_buf));
+        if ((numbytes = recv(sockfd, valid_buf, CLIENT_MAXDATASIZE - 1, 0)) == -1)
         {
-            for (int i = 0; i < input_names.size(); i++) 
-            {
-                cout << input_names[i];
-                // print "," if not the last element
-                if (i != input_names.size() - 1) {
-                    cout << ", ";
-                }
-            }
+            perror("client: recv");
+            exit(1);
         }
-        else {
-            set<string> invalid_names;
-            invalid_names = buf_to_string_set(invalid_buf);
-            int num_valid_names = input_names.size() - invalid_names.size();
-            for (int i = 0; i < input_names.size(); i++) 
-            {
-                if (invalid_names.find(input_names[i]) == invalid_names.end()) 
-                {
-                    cout << input_names[i];
-                    // print "," if not the last valid name
-                    if (num_valid_names > 1) {
-                        cout << ", ";
-                        num_valid_names--;
-                    }
-                }
-            }
-        }
-        cout << "." << endl;
+        cout << " works for " << valid_buf << "." << endl;
 
         // start a new request 
         input.clear();
