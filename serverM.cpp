@@ -419,6 +419,9 @@ int main(int argc, const char* argv[]){
             }
         }
 
+        // sleep (0.1 seconds)
+        usleep(100000); // 
+
         // split them into two sublists based on where the user information is located
         vector<string> users_a;
         vector<string> users_b;
