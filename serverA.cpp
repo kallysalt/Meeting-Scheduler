@@ -185,7 +185,7 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
 }
 
 // print a schedule
-void print_sched(schedule sched)
+void print_sched(schedule &sched)
 {
     cout << "[";
     for (int i = 0; i < sched.size(); i++) 
@@ -197,7 +197,24 @@ void print_sched(schedule sched)
             cout << ",";
         }
     }
-    cout << "]" << endl;
+    cout << "]";
+}
+
+// update a schedule
+void update_sched(schedules &scheds, string &name, char *buf) 
+{
+    // get rid of the first "[" in the buffer
+    int len = strlen(buf);
+    char new_buf[len];
+    for (int i = 1; i < len; i++) 
+    {
+        new_buf[i - 1] = buf[i];
+    }
+    new_buf[len - 1] = '\0';
+    // pase the new buffer
+    int start_time = atoi(strtok(buf, ","));
+    int end_time = atoi(strtok(NULL, "]"));
+    scheds[name].push_back(make_pair(start_time, end_time));
 }
 
 int main(int argc, const char* argv[])
@@ -368,7 +385,7 @@ int main(int argc, const char* argv[])
                 cout << names[i] << ": updated from ";
                 print_sched(scheds[names[i]]);
                 cout << " to ";
-                // update_sched(scheds[names[i]], buf2);
+                update_sched(scheds, names[i], buf2);
                 print_sched(scheds[names[i]]);
                 cout << endl;
             }
