@@ -184,6 +184,67 @@ vector<int> find_intersection(vector<string> names, schedules &scheds)
     return intersects;
 }
 
+// print a schedule
+void print_sched(schedule &sched)
+{
+    cout << "[";
+    for (int i = 0; i < sched.size(); i++) 
+    {
+        cout << "[" << sched[i].first << "," << sched[i].second << "]";
+        // print "," after each schedule, except the last one
+        if (i < sched.size() - 1) 
+        {
+            cout << ",";
+        }
+    }
+    cout << "]";
+}
+
+// update a schedule
+void update_sched(schedules &scheds, string &name, char *buf) 
+{
+    // get rid of the first "[" in the buffer
+    int len = strlen(buf);
+    char new_buf[len];
+    for (int i = 1; i < len; i++) 
+    {
+        new_buf[i - 1] = buf[i];
+    }
+    new_buf[len - 1] = '\0';
+    // pase the new buffer
+    int start = atoi(strtok(new_buf, ","));
+    int end = atoi(strtok(NULL, "]"));
+    // find the time slots to change
+    schedule sched = scheds[name];
+    int size = sched.size();
+    for (int i = 0; i < size; i++) 
+    {
+        if (start >= sched[i].first && end <= sched[i].second) 
+        {
+            if (sched[i].first == start && sched[i].second == end) {
+                // delete this entry
+                scheds[name].erase(scheds[name].begin() + i);
+                // NOTE: if this is the only entry, sched will be empty
+                return;
+            }
+            else if (sched[i].first == start) {
+                scheds[name][i].first = end;
+                return;
+            }
+            else if (sched[i].second == end) {
+                scheds[name][i].second = start;
+                return;
+            }
+            // TODO: modify current entry and add a new entry
+            else {
+                scheds[name][i].second = start;
+                scheds[name].insert(scheds[name].begin() + i + 1, make_pair(end, sched[i].second));
+                return;
+            }
+        }
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     // print boot up msg ////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,10 +405,18 @@ int main(int argc, const char* argv[])
         // if yes -> update its database to remove this time interval from the involved users time availability list
         else
         {
-            // update datebase
+            // update database
             cout << "Register a meeting at " << buf2 << " and update the availability for the following users:" << endl;
-            // TODO: <username 1>: updated from <original time availability list> to <updated time availability list>"
-            
+            // <username 1>: updated from <original time availability list> to <updated time availability list>"
+            for (int i = 0; i < names.size(); i++) 
+            {
+                cout << names[i] << ": updated from ";
+                print_sched(scheds[names[i]]);
+                cout << " to ";
+                update_sched(scheds, names[i], buf2);
+                print_sched(scheds[names[i]]);
+            }
+            cout << "." << endl;
             // send a message to server M to notify it that the registration has finished
             if ((sendto(sockfd, "finished", 8, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
             {
