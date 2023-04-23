@@ -212,9 +212,34 @@ void update_sched(schedules &scheds, string &name, char *buf)
     }
     new_buf[len - 1] = '\0';
     // pase the new buffer
-    int start_time = atoi(strtok(new_buf, ","));
-    int end_time = atoi(strtok(NULL, "]"));
-    scheds[name].push_back(make_pair(start_time, end_time));
+    int start = atoi(strtok(new_buf, ","));
+    int end = atoi(strtok(NULL, "]"));
+    scheds[name].push_back(make_pair(start, end));
+    // find the time slots to change
+    schedule sched = scheds[name];
+    int size = sched.size();
+    for (int i = 0; i < size; i++) 
+    {
+        if (start >= sched[i].first && end <= sched[i+1].second) 
+        {
+            if (scheds[name][i].first == start && scheds[name][i].second == end) {
+                // TODO: delete this entry
+                scheds[name].erase(scheds[name].begin() + i);
+                // NOTE: if this is the only entry, sched will be empty
+                return;
+            }
+            else if (scheds[name][i].first == start) {
+                scheds[name][i].first = end;
+                return;
+            }
+            else if (scheds[name][i].second == end) {
+                scheds[name][i].second = start;
+                return;
+            }
+            // TODO: insert another sched if necessary
+            return;
+        }
+    }
 }
 
 int main(int argc, const char* argv[])
