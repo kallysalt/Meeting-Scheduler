@@ -9,9 +9,13 @@
     - the main server receives the time slots from different backend servers, runs an algorithm to get the final time slots that works for all participants, and sends the result back to the client. The scheduler then can decide the final meeting time according to the available time recommendations and schedule it in the involved users’ calendars
 - main server manages which backend server a user’s info is stored in
 - the main server also plays a role of handling requests from clients
+- users can schedule
 
 references: beej
 
 additional file: project.h, which is used to share common code (e.g. libraries to include, type definitions, global variables) between different files
 
 assumption: okay for client input to contain more than one consecutive white spaces
+client interval should have no extra space
+
+if none is valid, "None of the usernames being entered is valid." 

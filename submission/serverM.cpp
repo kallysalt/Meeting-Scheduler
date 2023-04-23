@@ -223,8 +223,7 @@ int main(int argc, const char* argv[]){
     char names_buf[USERNAMES_BUF_SIZE];
     memset(names_buf, 0, sizeof(names_buf));
     int numbytes;
-    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
-        (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
+    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
     {
         perror("serverM udp: recvfrom");
         exit(1);
@@ -254,8 +253,7 @@ int main(int argc, const char* argv[]){
     
     // receive usernames sent from server A/B via udp over UDP_PORT_M (from beej's guide)
     memset(names_buf, 0, sizeof(names_buf));
-    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, 
-        (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
+    if ((numbytes = recvfrom(sockfd_udp_m, names_buf, USERNAMES_BUF_SIZE - 1 , 0, (struct sockaddr *) &their_addr_udp, &udp_addr_len)) == -1) 
     {
         perror("serverM udp: recvfrom");
         exit(1);
@@ -358,9 +356,9 @@ int main(int argc, const char* argv[]){
 
     // set up finishes ///////////////////////////////////////////////////////////////////////////////////////////
 
-    while (1) // main accept loop (from beej's guide)
+    while (1) 
     {  
-        // receive names sent from client via tcp (from beej's guide) (todo: make sure prepared)
+        // receive names sent from client via tcp (from beej's guide) 
         char names_buf[USERNAMES_BUF_SIZE];
         memset(names_buf, 0, sizeof(names_buf));
         if ((numbytes = recv(new_fd, names_buf, USERNAMES_BUF_SIZE - 1, 0)) == -1) 
@@ -599,6 +597,98 @@ int main(int argc, const char* argv[]){
         
         // print correct on screen msg after sending the final time slots
         cout << "Main Server sent the result to the client." << endl;
+
+        // wait for client msg to see if further action //////////////////////////////////////////////////////////////
+        // if no further action -> continue to go to the next interation
+        // if has further action -> pass the received interval to involved servers
+        char buf[INTERVAL_SIZE];
+        if ((numbytes = recv(new_fd, buf, INTERVAL_SIZE - 1, 0)) == -1) 
+        {
+            perror("serverM: recv");
+            exit(1);
+        }
+        buf[numbytes] = '\0';
+        if (strcmp(buf, "stop") == 0) // tell involved servers to stop waiting
+        {
+            // only if a is involved -> tell a to stop
+            if (users_a.size() > 0) 
+            {
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            // only if b is involved -> tell b to stop
+            if (users_b.size() > 0) 
+            {
+                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+            }
+            // continue to go to the next interation
+            continue; 
+        }
+        else // send the interval to involved servers
+        {
+            // print correct on screen msg after receiving the interval from client
+            cout << "Main Server received from client the final meeting time using TCP over port" << TCP_PORT_M << ":" << endl;
+            cout << buf << endl;
+            
+            // only if a is involved -> send the interval to server A via udp
+            if (users_a.size() > 0) {
+                // send the interval to server A via udp
+                if ((numbytes = sendto(sockfd_udp_m, buf, strlen(buf), 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+                // print correct on screen msg after sending the interval to server A
+                cout << "Main Server sent the final meeting time to server A." << endl;
+                // receive the confirmation from server A
+                char finish_buf[10];
+                if ((numbytes = recvfrom(sockfd_udp_m, finish_buf, 9, 0, (struct sockaddr *) &addr_udp_a, &addr_len_udp_a)) == -1) 
+                {
+                    perror("serverM udp: recvfrom");
+                    exit(1);
+                }
+                finish_buf[numbytes] = '\0';
+                // print correct on screen msg after receiving the confirmation from server A
+                cout << "Main Server received the confirmation from Server A using UDP over port" << UDP_PORT_M << "." << endl;
+            }
+            // only if b is involved -> send the interval to server B via udp
+            if (users_b.size() > 0) {
+                // send the interval to server A via udp
+                if ((numbytes = sendto(sockfd_udp_m, buf, strlen(buf), 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+                {
+                    perror("serverM udp: sendto");
+                    exit(1);
+                }
+                // print correct on screen msg after sending the interval to server B
+                cout << "Main Server sent the final meeting time to server B." << endl;
+                // receive the confirmation from server B
+                char finish_buf[10];
+                if ((numbytes = recvfrom(sockfd_udp_m, finish_buf, 9, 0, (struct sockaddr *) &addr_udp_b, &addr_len_udp_b)) == -1) 
+                {
+                    perror("serverM udp: recvfrom");
+                    exit(1);
+                }
+                finish_buf[numbytes] = '\0';
+                // print correct on screen msg after receiving the confirmation from server B
+                cout << "Main Server received the confirmation from Server B using UDP over port" << UDP_PORT_M << "." << endl;
+            }
+
+            // send the confirmation to client via tcp
+            if (send(new_fd, "finished", 8, 0) == -1) 
+            {
+                perror("serverM: send");
+            }
+            // print correct on screen msg after sending the confirmation to client
+            cout << "Main Server sent the confirmation to the client." << endl;
+        }
+
     }
 
     return 0;
