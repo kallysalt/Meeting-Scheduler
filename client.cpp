@@ -50,7 +50,7 @@ int validate_time_interval(string input, vector<string> intersects)
     // TODO: check if user input is valid
     if (input[0]!= '[' || input[input.size()-1] != ']') 
     {
-        return 0;
+        return 0; // not valid
     }
 
     // store avaialble times in a integer vector
@@ -68,7 +68,7 @@ int validate_time_interval(string input, vector<string> intersects)
     ss >> requested_time[0];
     ss >> comma;
     ss >> requested_time[1];
-    cout << "requested time: " << requested_time[0] << " " << requested_time[1] << endl;
+    // cout << "dbg requested time: " << requested_time[0] << " " << requested_time[1] << endl;
 
     // compare to see if requested time is valid
     int start = requested_time[0];
@@ -222,10 +222,11 @@ int main(int argc, const char* argv[]){
             perror("client: recv");
             exit(1);
         }
+        valid_names_buf[numbytes] = '\0';
         cout << " works for " << valid_names_buf << "." << endl;
 
-        // if no valid time interval -> notify server m, continue to go to next iteration
-        // if valid time interval -> ask user to schedule a meeting
+        // if no valid time interval -> notify server m, continue to go to next iteration ///////////////////////////
+        // if valid time interval -> ask user to schedule a meeting 
         if (intersects.size() == 0) {
             // send "stop" to server m over tcp
             if (send(sockfd, "stop", 4, 0) == -1)
@@ -239,13 +240,14 @@ int main(int argc, const char* argv[]){
         {
             input.clear();
             cout << "Please enter the final meeting time to register an meeting:" << endl;
+            cout << "Format must be [start_time,end_time]" << endl;
             getline(cin, input);
         }
 
         // if user input is not valid -> ask user to enter again
         int valid = validate_time_interval(input, intersects);
         while (!valid) {
-            cout << "Time interval <[t_start, t_end]> is not valid. Please enter again:" << endl;
+            cout << "Time interval " << input << " is not valid. Please enter again:" << endl;
             getline(cin, input);
             valid = validate_time_interval(input, intersects);
         }
@@ -256,6 +258,21 @@ int main(int argc, const char* argv[]){
             perror("client: send");
             exit(1);
         }
+
+        // print on screen msg after sending final meeting time to the main server
+        cout << "Sent the request to register " << input << " as the meeting time for " << valid_names_buf << "." << endl;
+
+        // receive confirmation from main server
+        char finish_buf[10];
+        memset(finish_buf, 0, sizeof(finish_buf));
+        if ((numbytes = recv(sockfd, finish_buf, 10 - 1, 0)) == -1)
+        {
+            perror("client: recv");
+            exit(1);
+        }
+        finish_buf[numbytes] = '\0';
+        // print on screen msg after receiving confirmation from the main server
+        cout << "Received the notification that registration has finished." << endl;
 
         // start a new request 
         input.clear();

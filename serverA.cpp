@@ -332,12 +332,13 @@ int main(int argc, const char* argv[])
         // Print correct on screen msg indicating the success of sending the response to the main server
         cout << "Server A finished sending the response to Main Server." << endl;
 
-        // receive update from server m to see if need to update its database
+        // receive update from server m to see if need to update its database //////////////////////////////////////
         char buf2[INTERVAL_SIZE];
         if ((numbytes = recvfrom(sockfd, buf2, INTERVAL_SIZE - 1, 0, (struct sockaddr *) &their_addr, &addr_len)) == -1) {
             perror("serverA: recvfrom");
             exit(1);
         }
+        buf2[numbytes] = '\0';
         // if not -> continue to go to the next iteration
         if (strcmp(buf2, "stop") == 0) {
             continue;
@@ -346,13 +347,18 @@ int main(int argc, const char* argv[])
         else
         {
             // update datebase
-            cout << "Server A is updating its database." << endl;
+            cout << "Register a meeting at " << buf << " and update the availability for the following users:" << endl;
+            // TODO: <username 1>: updated from <original time availability list> to <updated time availability list>"
+            
+            // send a message to server M to notify it that the registration has finished
+            if ((sendto(sockfd, "finished", 8, 0, servinfo_udp_m->ai_addr, servinfo_udp_m->ai_addrlen)) == -1) 
+            {
+                perror("serverA: sendto");
+                exit(1);
+            }
+            // print correct on screen msg indicating the success of sending the response to the main server
+            cout << "Notified Main Server that registration has finished." << endl;
         }
-
-        // print the on-screen messages showing the updates:
-        // "Register a meeting at <time slot> and update the availability for the following users:
-        // <username 1>: updated from <original time availability list> to <updated time availability list>"
-
     }
 
     // free the linked-list (from beej's guide)
