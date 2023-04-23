@@ -642,14 +642,14 @@ int main(int argc, const char* argv[]){
                     exit(1);
                 }
             }
-            else // send "stop" to server A via udp
-            {
-                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
-                {
-                    perror("serverM udp: sendto");
-                    exit(1);
-                }
-            }
+            // else // send "stop" to server A via udp
+            // {
+            //     if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_a, sizeof(addr_udp_a))) == -1) 
+            //     {
+            //         perror("serverM udp: sendto");
+            //         exit(1);
+            //     }
+            // }
             // if b is involved -> send the interval to server B via udp
             if (users_b.size() > 0) {
                 // send the interval to server A via udp
@@ -659,14 +659,14 @@ int main(int argc, const char* argv[]){
                     exit(1);
                 }
             }
-            else // send "stop" to server B via udp
-            {
-                if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
-                {
-                    perror("serverM udp: sendto");
-                    exit(1);
-                }
-            }
+            // else // send "stop" to server B via udp
+            // {
+            //     if ((numbytes = sendto(sockfd_udp_m, "stop", 4, 0, (struct sockaddr *) &addr_udp_b, sizeof(addr_udp_b))) == -1) 
+            //     {
+            //         perror("serverM udp: sendto");
+            //         exit(1);
+            //     }
+            // }
         }
 
     }
